@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/img">
+        <file alias="dark">images/login_frame.jpg</file>
+        <file alias="grey">images/grey_scheme_01.jpg</file>
+        <file alias="cold">images/timg.jpeg</file>
+    </qresource>
+</RCC>
