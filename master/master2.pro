@@ -6,7 +6,7 @@
 
 QT       += core gui
 QT       += sql
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets network
 
 TARGET = master2
 TEMPLATE = app
@@ -19,13 +19,16 @@ SOURCES += main.cpp\
     report.cpp \
     master_controller.cpp \
     user_controller.cpp \
-    log.cpp
+    log.cpp \
+    NetController.cpp
 
 HEADERS  += mainwindow.h \
     login.h \
     qss_res.h \
     title_bar.h \
-    datastruct.h
+    datastruct.h \
+    NetController.h \
+    constant.h
 
 FORMS    += mainwindow.ui \
     login.ui

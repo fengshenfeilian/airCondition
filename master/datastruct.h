@@ -1,8 +1,8 @@
 #ifndef DATASTRUCT_H
 #define DATASTRUCT_H
 #include <QString>
-const int COOLMODE = 0;
-const int HEATMODE = 1;
+const int COLDMODE = 0;
+const int WARMMODE = 1;
 
 int DEFAULT_TEMP;
 
@@ -24,7 +24,6 @@ typedef struct slave_info{
     double cost;
     double energy;
     int slave_state;
-
 }*/
 
 

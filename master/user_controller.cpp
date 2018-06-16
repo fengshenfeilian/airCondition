@@ -3,43 +3,38 @@
 #include<QString>
 #include<QMessageBox>
 #include<QSqlQuery>
+#include<QSqlTableModel>
+#include<QSqlRecord>
 #include<QSqlDatabase>
 #include<QDateTime>
+#include<QDebug>
 
 const int DEFAULT_TEMP=25;
 /*
 登记入住:
+------------------------------------------------
 #获取 room_id 和 user_id (text)
+#若room_id不合法,则弹出消息框:不合法的房间号
 #在表room_state中进行查询(room_id是否被使用)
 #若该房间已被占用,入住失败,弹出警告对话框:该房间已入住!
 #构建元组: (room_id,user_id,current_temp=DEFAULT_TEMP,current_wind=0,current_cost=0,check_in_time=CURRENT_TIME)
-#将该元祖添加到表room_state中
+#将该元组添加到表room_state中
 #弹出对话框:登记入住成功!
+------------------------------------------------
 */
 void MainWindow::on_pbsignin_clicked()
 {
     if(ui->leroomid->text().isEmpty() || ui->leuserpwd->text().isEmpty()){
-        QMessageBox::information(this,tr("Notice"),tr("请输入完整信息！"),QMessageBox::Ok);
+        infoIncompleteError();
         return;
     }
-    QString room_id = ui->leroomid->text().trimmed();
+    QString room_id_text = ui->leroomid->text().trimmed();
     QString user_id = ui->leuserpwd->text().trimmed();
-
-    QSqlQuery q;
-    q.prepare("select * from room_state where room_id=:rid");
-    q.bindValue(":rid",room_id);
-    q.exec();
-           //房间已被占用
-    if(q.next()){
-        QMessageBox::information(this,tr("Notice"),tr("该房间已被占用!"),QMessageBox::Ok);
-        return;
+    int room_id = room_id_text.toInt();
+    if(room_id>0 && room_id<5){
+        checkIn(room_id,user_id);
     }else{
-        //获取登记时间
-        QDateTime t =QDateTime::currentDateTime();
-        QString check_in_time = t.toString("yyyy-MM-dd hh:mm:ss ddd");
-        //向表room_state插入记录
-        QSqlQuery insq;
-
+        roomIdError();
     }
 
 }
@@ -57,5 +52,95 @@ void MainWindow::on_pbsignin_clicked()
 */
 void MainWindow::on_pbsignout_clicked()
 {
+    if(ui->leroomid->text().isEmpty() || ui->leuserpwd->text().isEmpty()){
+        infoIncompleteError();
+        return;
+    }
+    QString room_id_text = ui->leroomid->text().trimmed();
+    QString user_id = ui->leuserpwd->text().trimmed();
+    int room_id = room_id_text.toInt();
+    if(room_id>0 && room_id<5){
+        checkOut(room_id,user_id);
+    }else{
+        roomIdError();
+    }
 
 }
+
+void MainWindow::checkIn(int room_id, QString user_id)
+{
+    //qDebug()<<room_id<<" "<<user_id;
+    QSqlQuery q;
+    q.prepare("select * from room_state where room_id=:rid");
+    q.bindValue(":rid",room_id);
+    q.exec();
+    //房间已被占用
+    if(q.next()){
+        QMessageBox::information(this,tr("Notice"),tr("该房间已被占用!"),QMessageBox::Ok);
+        return;
+    }else{
+        //获取登记时间
+        QDateTime t =QDateTime::currentDateTime();
+        QString check_in_time = t.toString("yyyy-MM-dd hh:mm:ss ddd");
+        //向表room_state插入记录
+        QSqlQuery insq;
+        insq.prepare("insert into room_state(room_id,user_id,current_temp,current_wind,current_cost,check_in_time) values (?,?,?,?,?,?)");
+        insq.bindValue(0,room_id);
+        insq.bindValue(1,user_id);
+        insq.bindValue(2,DEFAULT_TEMP);
+        insq.bindValue(3,0);
+        insq.bindValue(4,0.0);
+        insq.bindValue(5,check_in_time);
+        insq.exec();
+        QMessageBox::information(this,tr("Notice"),tr("登记成功,欢迎入住!"),QMessageBox::Ok);
+        return;
+    }
+}
+
+void MainWindow::checkOut(int room_id, QString user_id)
+{
+    QSqlQuery q;
+    q.prepare("select * from room_state where room_id=:rid and user_id=:uid");
+    q.bindValue(":rid",room_id);
+    q.bindValue(":uid",user_id);
+    q.exec();
+    if(q.next()){
+        //--------------------------------------------------------------------------------------
+        //提取出q的表项信息,传进updateLog
+        //从数据库中删除该条记录
+        //弹出对话框:删除成功!
+    }else{
+        checkOutError();
+    }
+}
+
+void MainWindow::updateLog(int room_id, QString check_in_time, QString user_id, double cost)
+{
+    QDateTime t =QDateTime::currentDateTime();
+    QString check_out_time = t.toString("yyyy-MM-dd hh:mm:ss ddd");
+    QSqlQuery insq;
+    insq.prepare("insert into logfile(room_id,check_in_time,check_out_time,user_id,cost,) values (?,?,?,?,?,)");
+    insq.bindValue(0,room_id);
+    insq.bindValue(1,check_in_time);
+    insq.bindValue(2,check_out_time);
+    insq.bindValue(3,user_id);
+    insq.bindValue(4,cost);
+    insq.exec();
+}
+
+void MainWindow::infoIncompleteError()
+{
+    QMessageBox::information(this,tr("Notice"),tr("请输入完整信息！"),QMessageBox::Ok);
+}
+
+void MainWindow::roomIdError()
+{
+    QMessageBox::information(this,tr("Notice"),tr("房间号输入不合法!房间号的范围为1-4"),QMessageBox::Ok);
+}
+
+void MainWindow::checkOutError()
+{
+    QMessageBox::information(this,tr("Notice"),tr("用户信息不匹配,请重新检查登记信息!"),QMessageBox::Ok);
+}
+
+

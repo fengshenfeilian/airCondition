@@ -9,7 +9,6 @@
 /*
 table: logfile
 room_id | check_in_time | check_out_time | user_id | cost |
-
 */
 
 /*
@@ -32,7 +31,7 @@ void MainWindow::initializeLog()
     log_model->setHeaderData(log_model->fieldIndex("cost"),Qt::Horizontal,"电费");
 
     log_model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    //选取整个表的所有行    
+    //选取整个表的所有行
     log_model->select();
     //将表log_model绑定给tableview:tvlog
     ui->tvLog->setModel(log_model);
@@ -65,7 +64,4 @@ void MainWindow::on_pbLogRefresh_clicked()
 
 }
 
-void MainWindow::showLogTable()
-{
 
-}

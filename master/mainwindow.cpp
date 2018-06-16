@@ -9,19 +9,13 @@ MainWindow::MainWindow(QWidget *parent) :
     CommonHelper::setStyle(":qdarkstyle/style.qss");
   //  setWindowFlags(Qt::FramelessWindowHint | windowFlags());
     ui->setupUi(this);
-
     ui->tabWidget->setCurrentIndex(0);
-
-
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
-
-
 
 
 void MainWindow::on_tabWidget_currentChanged(int index)
@@ -37,8 +31,8 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         break;
     case 3:
         initializeLog();
-
    }
 }
+
 
 

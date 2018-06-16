@@ -24,7 +24,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -33,10 +33,10 @@
        <widget class="QGroupBox" name="groupBox">
         <property name="geometry">
          <rect>
-          <x>300</x>
-          <y>130</y>
-          <width>351</width>
-          <height>141</height>
+          <x>260</x>
+          <y>100</y>
+          <width>421</width>
+          <height>241</height>
          </rect>
         </property>
         <property name="font">
@@ -47,78 +47,42 @@
         <property name="title">
          <string>信息填写</string>
         </property>
-        <widget class="QLabel" name="lbroomid">
-         <property name="geometry">
-          <rect>
-           <x>12</x>
-           <y>33</y>
-           <width>54</width>
-           <height>18</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>房间号:</string>
-         </property>
-        </widget>
-        <widget class="QLabel" name="lbuserid">
-         <property name="geometry">
-          <rect>
-           <x>12</x>
-           <y>65</y>
-           <width>54</width>
-           <height>18</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>身份证号:</string>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="leroomid">
-         <property name="geometry">
-          <rect>
-           <x>72</x>
-           <y>33</y>
-           <width>241</width>
-           <height>26</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="leuserpwd">
-         <property name="geometry">
-          <rect>
-           <x>72</x>
-           <y>65</y>
-           <width>241</width>
-           <height>26</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbsignin">
-         <property name="geometry">
-          <rect>
-           <x>90</x>
-           <y>100</y>
-           <width>80</width>
-           <height>26</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>登记入住</string>
-         </property>
-        </widget>
-        <widget class="QPushButton" name="pbsignout">
-         <property name="geometry">
-          <rect>
-           <x>200</x>
-           <y>100</y>
-           <width>80</width>
-           <height>26</height>
-          </rect>
-         </property>
-         <property name="text">
-          <string>退房</string>
-         </property>
-        </widget>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="1" colspan="2">
+          <widget class="QLineEdit" name="leroomid"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lbuserid">
+           <property name="text">
+            <string>身份证号:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="lbroomid">
+           <property name="text">
+            <string>房间号:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" colspan="2">
+          <widget class="QLineEdit" name="leuserpwd"/>
+         </item>
+         <item row="2" column="2">
+          <widget class="QPushButton" name="pbsignout">
+           <property name="text">
+            <string>退房</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="pbsignin">
+           <property name="text">
+            <string>登记入住</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </widget>
       <widget class="QWidget" name="tab_2">
@@ -167,14 +131,14 @@
        <widget class="QStackedWidget" name="stackedWidget">
         <property name="geometry">
          <rect>
-          <x>90</x>
+          <x>80</x>
           <y>10</y>
           <width>831</width>
           <height>421</height>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page">
          <widget class="QPushButton" name="pbopen">
@@ -190,24 +154,11 @@
            <string>开机</string>
           </property>
          </widget>
-         <widget class="QPushButton" name="pbwait">
-          <property name="geometry">
-           <rect>
-            <x>700</x>
-            <y>120</y>
-            <width>80</width>
-            <height>26</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>待机</string>
-          </property>
-         </widget>
          <widget class="QPushButton" name="pbshutdown">
           <property name="geometry">
            <rect>
             <x>700</x>
-            <y>180</y>
+            <y>130</y>
             <width>80</width>
             <height>26</height>
            </rect>
@@ -290,7 +241,88 @@
           </layout>
          </widget>
         </widget>
-        <widget class="QWidget" name="page_4"/>
+        <widget class="QWidget" name="page_4">
+         <widget class="QWidget" name="gridLayoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>831</width>
+            <height>411</height>
+           </rect>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="2">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox">
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="6">
+            <widget class="QLineEdit" name="lineEdit"/>
+           </item>
+           <item row="1" column="0" colspan="7">
+            <widget class="QTableView" name="slaveView"/>
+           </item>
+           <item row="2" column="0">
+            <widget class="QPushButton" name="pbDelSlave">
+             <property name="text">
+              <string>删除选中条目</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="pbUpdateSlave">
+             <property name="text">
+              <string>修改选中条目</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>刷新频率</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="label_5">
+             <property name="text">
+              <string>输入关键字以搜索数据库:         </string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="page_5"/>
        </widget>
        <widget class="QPushButton" name="mode_control">
         <property name="geometry">
@@ -303,6 +335,19 @@
         </property>
         <property name="text">
          <string>模式切换</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbNetRecord">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>360</y>
+          <width>71</width>
+          <height>91</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>温控记录</string>
         </property>
        </widget>
       </widget>
