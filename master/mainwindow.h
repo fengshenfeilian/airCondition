@@ -47,6 +47,10 @@ private slots:
 
     void on_tabWidget_currentChanged(int index);
 
+    void on_pbLogReset_clicked();
+
+    void on_pbLogRefresh_clicked();
+
 private:
     Ui::MainWindow *ui;
 

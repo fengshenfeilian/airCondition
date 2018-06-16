@@ -40,7 +40,7 @@ void MainWindow::initializeLog()
     ui->tvLog->resizeColumnsToContents();
     ui->tvLog->horizontalHeader();
     for(int i = 0; i < ui->tvLog->horizontalHeader()->count(); i++){
-        ui->tvLog->setColumnWidth(i, ui->tvLog->columnWidth(i)+100);
+        ui->tvLog->setColumnWidth(i, ui->tvLog->columnWidth(i)+80);
     }
     ui->tvLog->horizontalHeader()->setStretchLastSection(true);
 }

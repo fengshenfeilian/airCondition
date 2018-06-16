@@ -56,16 +56,19 @@ void MainWindow::on_pbshutdown_clicked()
 
 }
 
+//模式切换按钮
 void MainWindow::on_pbmode_clicked()
 {
 
 }
 
+//升高默认温度
 void MainWindow::on_temp_plus_clicked()
 {
 
 }
 
+//降低默认温度
 void MainWindow::on_temp_minus_clicked()
 {
 
