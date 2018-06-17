@@ -100,6 +100,7 @@ private slots:
     void on_boxRefreshFreq_valueChanged(double arg1);
     void on_pbExit_clicked();
     void refreshLeUser();
+    void checkOutInfo();
 
 private:
     Ui::MainWindow *ui;

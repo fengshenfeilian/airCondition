@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "qss_res.h"
 #include <QDebug>
+#include <QMovie>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -26,6 +27,10 @@ void MainWindow::initMainWindow()
     setLbStatusMode();
     setLbTemp(DEFAULT_TEMP);
     unableAccess();
+   /* QMovie *movie = new QMovie("/home/marco/project/airCondition/master/images/movie.gif");
+    ui->lbMovie->setMovie(movie);
+    movie->start();
+*/
 }
 
 
