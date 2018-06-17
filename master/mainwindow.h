@@ -91,6 +91,9 @@ private slots:
     void setTempError();
     void setLbTemp(int temp);
 
+
+    void on_boxRefreshFreq_valueChanged(double arg1);
+
 private:
     Ui::MainWindow *ui;
 

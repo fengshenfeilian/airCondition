@@ -37,7 +37,7 @@ void login::on_pblogin_clicked()
     QString psd=ui->lepsd->text().trimmed();
 
     QSqlQuery query;
-    query.prepare("select *from superuser where uid=:uid and psd=:psd");
+    query.prepare("select * from superuser where uid=:uid and psd=:psd");
     query.bindValue(":uid",uid);
     query.bindValue(":psd",psd);
     query.exec();

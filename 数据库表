@@ -9,7 +9,8 @@ user_id text not null,
 current_temp int not null,
 current_wind text not null,
 current_cost real not null,
-check_in_time text not null
+check_in_time text not null,
+last_open_time text not null
 );
 
 

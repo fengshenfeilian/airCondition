@@ -83,13 +83,14 @@ void MainWindow::checkIn(int room_id, QString user_id)
         QString check_in_time = t.toString("yyyy-MM-dd hh:mm:ss ddd");
         //向表room_state插入记录
         QSqlQuery insq;
-        insq.prepare("insert into room_state(room_id,user_id,current_temp,current_wind,current_cost,check_in_time) values (?,?,?,?,?,?)");
+        insq.prepare("insert into room_state(room_id,user_id,current_temp,current_wind,current_cost,check_in_time,last_open_time) values (?,?,?,?,?,?,?)");
         insq.bindValue(0,room_id);
         insq.bindValue(1,user_id);
         insq.bindValue(2,DEFAULT_TEMP);
         insq.bindValue(3,0);
         insq.bindValue(4,0.0);
         insq.bindValue(5,check_in_time);
+        insq.bindValue(6,"None");
         insq.exec();
         QMessageBox::information(this,tr("Notice"),tr("登记成功,欢迎入住!"),QMessageBox::Ok);
         return;

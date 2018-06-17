@@ -85,14 +85,20 @@ void MainWindow::on_pbshutdown_clicked()
 //default = 22
 void MainWindow::on_pbModeCold_clicked()
 {
+    workmode = COLDMODE;
     DEFAULT_TEMP = 22;
+    setLbTemp(22);
+    setLbStatusMode();
 }
 
 //切换至制热模式
 //default 28
 void MainWindow::on_pbModeWarm_clicked()
 {
+    workmode = WARMMODE;
     DEFAULT_TEMP = 28;
+    setLbTemp(28);
+    setLbStatusMode();
 }
 
 //升高默认温度
@@ -107,6 +113,15 @@ void MainWindow::on_temp_minus_clicked()
     setDefaultTemp(DEFAULT_TEMP-1);
 }
 
+//改变spinbox的值,获取到一个新的刷新频率,对数据库进行刷新操作
+/*
+# 每一次刷新,重新计算表room_state的属性"current_cost"的值
+# 计算方法:取出
+*/
+void MainWindow::on_boxRefreshFreq_valueChanged(double freq_value)
+{
+
+}
 
 /*
  *------------------------------------------------------------------
@@ -118,12 +133,12 @@ void MainWindow::on_temp_minus_clicked()
 void MainWindow::setLbStatusOn()
 {
    if(state == OPEN){
-        ui->lbStatusOn->setText(tr("主机状态:开机"));
+        ui->lbStatusOn->setText(tr("主机状态: 开机"));
     }
     else if(state == SHUTDOWN){
-        ui->lbStatusOn->setText(tr("主机状态:关机"));
+        ui->lbStatusOn->setText(tr("主机状态: 关机"));
     }else{
-       ui->lbStatusOn->setText(tr("主机状态:待机"));
+       ui->lbStatusOn->setText(tr("主机状态: 待机"));
    }
 }
 
@@ -131,10 +146,10 @@ void MainWindow::setLbStatusOn()
 void MainWindow::setLbStatusMode()
 {
     if(state == OPEN){
-        if(workmode == COLDMODE)ui->lbStatusMode->setText(tr("工作模式:制冷"));
-        else ui->lbStatusMode->setText(tr("工作模式:制热"));
+        if(workmode == COLDMODE)ui->lbStatusMode->setText(tr("工作模式: 制冷"));
+        else ui->lbStatusMode->setText(tr("工作模式: 制热"));
     }else if (state == SHUTDOWN){
-        ui->lbStatusMode->setText(tr("工作模式:无"));
+        ui->lbStatusMode->setText(tr("工作模式: 无"));
     }
 }
 
@@ -166,12 +181,12 @@ void MainWindow::setDefaultTemp(int temp)
         setTempError();
         return;
     }
-    if(state == COLDMODE){
+    if(workmode == COLDMODE){
           if(temp>25){
               setTempError();
               return;
           }
-    }else if (state == WARMMODE){
+    }else if (workmode == WARMMODE){
         if(temp<25){
             setTempError();
             return;
@@ -201,13 +216,14 @@ void MainWindow::showRoomState()
     roomStateModel->setHeaderData(roomStateModel->fieldIndex("current_wind"),Qt::Horizontal,"当前风速");
     roomStateModel->setHeaderData(roomStateModel->fieldIndex("current_cost"),Qt::Horizontal,"当前费用");
     roomStateModel->setHeaderData(roomStateModel->fieldIndex("check_in_time"),Qt::Horizontal,"入住时间");
+    roomStateModel->setHeaderData(roomStateModel->fieldIndex("last_open_time"),Qt::Horizontal,"上一次开机时间");
     roomStateModel->select();
     ui->slaveView->setModel(roomStateModel);
     //自适应填充窗口
     ui->slaveView->resizeColumnsToContents();
     ui->slaveView->horizontalHeader();
     for(int i = 0; i < ui->slaveView->horizontalHeader()->count(); i++){
-        ui->slaveView->setColumnWidth(i, ui->slaveView->columnWidth(i)+45);
+        ui->slaveView->setColumnWidth(i, ui->slaveView->columnWidth(i));
     }
     ui->slaveView->horizontalHeader()->setStretchLastSection(true);
 }
