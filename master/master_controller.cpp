@@ -170,7 +170,7 @@ void MainWindow::unableAccess()
 {
     ui->pbshutdown->setEnabled(false);
     ui->pbModeCold->setEnabled(false);
-    ui->pbModeCold->setEnabled(false);
+    ui->pbModeWarm->setEnabled(false);
     ui->temp_plus->setEnabled(false);
     ui->temp_minus->setEnabled(false);
 }

@@ -2,6 +2,8 @@
     <qresource prefix="/img">
         <file alias="dark">images/login_frame.jpg</file>
         <file alias="grey">images/grey_scheme_01.jpg</file>
-        <file alias="cold">images/timg.jpeg</file>
+        <file>images/0002_meitu_1.jpg</file>
+        <file>images/0002_meitu_1_meitu_2.jpg</file>
+        <file>images/0002_meitu_1_meitu_1.jpg</file>
     </qresource>
 </RCC>
