@@ -23,6 +23,8 @@ void MainWindow::initMainWindow()
 {
     setLbStatusOn();
     setLbStatusMode();
+    setLbTemp(DEFAULT_TEMP);
+    unableAccess();
 }
 
 

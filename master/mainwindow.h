@@ -85,6 +85,12 @@ private slots:
 
     void on_pbReportMonSearch_clicked();
 
+    void enableAccess();
+    void unableAccess();
+    void setDefaultTemp(int temp);
+    void setTempError();
+    void setLbTemp(int temp);
+
 private:
     Ui::MainWindow *ui;
 

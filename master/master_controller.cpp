@@ -61,6 +61,7 @@ void MainWindow::on_pbopen_clicked()
         state = OPEN;
         setLbStatusOn();
         setLbStatusMode();
+        enableAccess();
         openSuccessInfo();
     }
 }
@@ -75,33 +76,37 @@ void MainWindow::on_pbshutdown_clicked()
         state = SHUTDOWN;
         setLbStatusOn();
         setLbStatusMode();
+        unableAccess();
         closeSuccessInfo();
     }
 }
 
 //切换至制冷模式
+//default = 22
 void MainWindow::on_pbModeCold_clicked()
 {
-    
+    DEFAULT_TEMP = 22;
 }
 
 //切换至制热模式
+//default 28
 void MainWindow::on_pbModeWarm_clicked()
 {
-
+    DEFAULT_TEMP = 28;
 }
 
 //升高默认温度
 void MainWindow::on_temp_plus_clicked()
 {
-
+    setDefaultTemp(DEFAULT_TEMP+1);
 }
 
 //降低默认温度
 void MainWindow::on_temp_minus_clicked()
 {
-
+    setDefaultTemp(DEFAULT_TEMP-1);
 }
+
 
 /*
  *------------------------------------------------------------------
@@ -133,6 +138,54 @@ void MainWindow::setLbStatusMode()
     }
 }
 
+//开机之后赋予MainWindow权限:
+/*
+#允许进行的按钮操作:
+*/
+void MainWindow::enableAccess()
+{
+    ui->pbshutdown->setEnabled(true);
+    ui->pbModeCold->setEnabled(true);
+    ui->pbModeCold->setEnabled(true);
+    ui->temp_plus->setEnabled(true);
+    ui->temp_minus->setEnabled(true);
+}
+
+void MainWindow::unableAccess()
+{
+    ui->pbshutdown->setEnabled(false);
+    ui->pbModeCold->setEnabled(false);
+    ui->pbModeCold->setEnabled(false);
+    ui->temp_plus->setEnabled(false);
+    ui->temp_minus->setEnabled(false);
+}
+
+void MainWindow::setDefaultTemp(int temp)
+{
+    if(temp>35 || temp<18){
+        setTempError();
+        return;
+    }
+    if(state == COLDMODE){
+          if(temp>25){
+              setTempError();
+              return;
+          }
+    }else if (state == WARMMODE){
+        if(temp<25){
+            setTempError();
+            return;
+        }
+    }
+    DEFAULT_TEMP = temp;
+    setLbTemp(temp);
+}
+
+void MainWindow::setLbTemp(int temp)
+{
+    ui->lbDefaultTemp->setText(tr("%1").arg(temp));
+}
+
 /*
 扩展功能:-----------------------------------------------------------------
 1.按钮事件:删除选中条目
@@ -159,6 +212,12 @@ void MainWindow::showRoomState()
     ui->slaveView->horizontalHeader()->setStretchLastSection(true);
 }
 
+
+/*
+ *------------------------------------------------------------------
+ *模块:异常处理
+ *------------------------------------------------------------------
+*/
 void MainWindow::hasOpenError()
 {
     QMessageBox::information(this,tr("Notice"),tr("中央空调正在运行,无法重复开启!"),QMessageBox::Ok);
@@ -180,4 +239,8 @@ void MainWindow::closeSuccessInfo()
     QMessageBox::information(this,tr("Notice"),tr("中央空调已成功关闭!"),QMessageBox::Ok);
 }
 
+void MainWindow::setTempError()
+{
+    QMessageBox::information(this,tr("Notice"),tr("温度设置失败!"),QMessageBox::Ok);
+}
 
