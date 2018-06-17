@@ -4,7 +4,6 @@
 const int COLDMODE = 0;
 const int WARMMODE = 1;
 
-int DEFAULT_TEMP;
 
 enum state_type{
     SHUTDOWN = 0,

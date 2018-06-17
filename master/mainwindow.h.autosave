@@ -67,6 +67,7 @@ private slots:
     void closeSuccessInfo();
     void setLbStatusOn();
     void setLbStatusMode();
+    void initMainWindow();
 
 private:
     Ui::MainWindow *ui;

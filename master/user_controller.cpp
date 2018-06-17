@@ -9,7 +9,6 @@
 #include<QDateTime>
 #include<QDebug>
 
-const int DEFAULT_TEMP=25;
 /*
 登记入住:
 ------------------------------------------------

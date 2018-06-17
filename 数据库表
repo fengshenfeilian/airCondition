@@ -39,3 +39,20 @@ target_wind int not null,
 cost real not null,
 primary key(room_id,start_time)
 );
+
+
+
+
+
+
+
+
+
+
+
+//主机状态:开机    温控模式:制冷   
+
+
+
+
+
