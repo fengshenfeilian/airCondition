@@ -52,6 +52,7 @@ primary key(room_id,start_time)
 
 //主机状态:开机    温控模式:制冷   
 //制热
+//日报表 周报表 月报表 搜索
 
 
 

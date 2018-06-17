@@ -67,9 +67,23 @@ private slots:
     void setLbStatusMode();
     void initMainWindow();
 
-    void on_pbModeCode_clicked();
+    void on_pbModeCold_clicked();
 
     void on_pbModeWarm_clicked();
+
+    void on_pbReportDay_clicked();
+
+    void on_pbReportWeek_clicked();
+
+    void on_pbReportMon_clicked();
+
+
+
+    void on_pbReportDaySearch_clicked();
+
+    void on_pbReportWeekSearch_clicked();
+
+    void on_pbReportMonSearch_clicked();
 
 private:
     Ui::MainWindow *ui;

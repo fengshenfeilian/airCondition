@@ -1,6 +1,37 @@
 #include "mainwindow.h"
+#include "ui_mainwindow.h"
 
 void MainWindow::initializeReport()
+{
+
+}
+
+void MainWindow::on_pbReportDay_clicked()
+{
+    ui->reportStack->setCurrentIndex(0);
+}
+
+void MainWindow::on_pbReportWeek_clicked()
+{
+    ui->reportStack->setCurrentIndex(1);
+}
+
+void MainWindow::on_pbReportMon_clicked()
+{
+    ui->reportStack->setCurrentIndex(2);
+}
+
+void MainWindow::on_pbReportDaySearch_clicked()
+{
+
+}
+
+void MainWindow::on_pbReportWeekSearch_clicked()
+{
+
+}
+
+void MainWindow::on_pbReportMonSearch_clicked()
 {
 
 }

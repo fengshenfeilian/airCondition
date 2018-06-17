@@ -39,6 +39,10 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         break;
     case 3:
         initializeLog();
+        break;
    }
 }
+
+
+
 

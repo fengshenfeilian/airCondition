@@ -79,12 +79,13 @@ void MainWindow::on_pbshutdown_clicked()
     }
 }
 
-
-void MainWindow::on_pbModeCode_clicked()
+//切换至制冷模式
+void MainWindow::on_pbModeCold_clicked()
 {
-
+    
 }
 
+//切换至制热模式
 void MainWindow::on_pbModeWarm_clicked()
 {
 

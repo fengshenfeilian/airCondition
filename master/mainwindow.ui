@@ -138,7 +138,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page">
          <widget class="QPushButton" name="pbopen">
@@ -169,7 +169,7 @@
          </widget>
         </widget>
         <widget class="QWidget" name="page_2">
-         <widget class="QPushButton" name="pbModeCode">
+         <widget class="QPushButton" name="pbModeCold">
           <property name="geometry">
            <rect>
             <x>560</x>
@@ -394,6 +394,178 @@
        <attribute name="title">
         <string>报表</string>
        </attribute>
+       <widget class="QPushButton" name="pbReportDay">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>40</y>
+          <width>80</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>日报表</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbReportWeek">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>170</y>
+          <width>80</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>周报表</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="pbReportMon">
+        <property name="geometry">
+         <rect>
+          <x>50</x>
+          <y>300</y>
+          <width>80</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>月报表 </string>
+        </property>
+       </widget>
+       <widget class="QStackedWidget" name="reportStack">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>10</y>
+          <width>711</width>
+          <height>421</height>
+         </rect>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="page_6">
+         <widget class="QWidget" name="gridLayoutWidget_2">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>10</y>
+            <width>681</width>
+            <height>401</height>
+           </rect>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="2">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="0" colspan="4">
+            <widget class="QTableWidget" name="tableWidget"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pbReportDaySearch">
+             <property name="text">
+              <string>搜索(日报表)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDateEdit" name="dateEdit_2"/>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="page_7">
+         <widget class="QWidget" name="gridLayoutWidget_3">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>671</width>
+            <height>391</height>
+           </rect>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pbReportWeekSearch">
+             <property name="text">
+              <string>搜索(周报表)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="3">
+            <widget class="QTableView" name="tableView"/>
+           </item>
+           <item row="0" column="2">
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDateEdit" name="dateEdit_3"/>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="page_8">
+         <widget class="QWidget" name="gridLayoutWidget_4">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>691</width>
+            <height>411</height>
+           </rect>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="1" column="0" colspan="3">
+            <widget class="QTableView" name="tableView_2"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pbReportMonSearch">
+             <property name="text">
+              <string>搜索(月报表)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDateEdit" name="dateEdit_4"/>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </widget>
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="title">
