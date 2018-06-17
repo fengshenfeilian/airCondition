@@ -10,7 +10,8 @@ current_temp int not null,
 current_wind text not null,
 current_cost real not null,
 check_in_time text not null,
-last_open_time text not null
+last_open_time text not null,
+in_connect int not null
 );
 
 
@@ -43,6 +44,13 @@ primary key(room_id,start_time)
 
 
 
+/*
+#room_state表数据流动:
++ 用户注册成功,生成一条room_state记录
++ 用户退房成功,删除一条room_state记录
++ room_state表实时刷新: 更新room_state的current_cost字段
+
+*/
 
 
 
@@ -50,10 +58,6 @@ primary key(room_id,start_time)
 
 
 
-
-//主机状态:开机    温控模式:制冷   
-//制热
-//日报表 周报表 月报表 搜索 退出
 
 
 

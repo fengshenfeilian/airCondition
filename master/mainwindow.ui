@@ -24,7 +24,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -132,20 +132,20 @@
         <property name="geometry">
          <rect>
           <x>100</x>
-          <y>20</y>
+          <y>40</y>
           <width>811</width>
-          <height>381</height>
+          <height>391</height>
          </rect>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page">
          <widget class="QPushButton" name="pbopen">
           <property name="geometry">
            <rect>
-            <x>110</x>
-            <y>330</y>
+            <x>530</x>
+            <y>310</y>
             <width>91</width>
             <height>41</height>
            </rect>
@@ -157,8 +157,8 @@
          <widget class="QPushButton" name="pbshutdown">
           <property name="geometry">
            <rect>
-            <x>260</x>
-            <y>330</y>
+            <x>670</x>
+            <y>310</y>
             <width>91</width>
             <height>41</height>
            </rect>
@@ -172,10 +172,10 @@
          <widget class="QPushButton" name="pbModeCold">
           <property name="geometry">
            <rect>
-            <x>110</x>
-            <y>280</y>
-            <width>80</width>
-            <height>26</height>
+            <x>529</x>
+            <y>310</y>
+            <width>91</width>
+            <height>41</height>
            </rect>
           </property>
           <property name="text">
@@ -185,10 +185,10 @@
          <widget class="QPushButton" name="pbModeWarm">
           <property name="geometry">
            <rect>
-            <x>270</x>
-            <y>280</y>
-            <width>80</width>
-            <height>26</height>
+            <x>669</x>
+            <y>310</y>
+            <width>91</width>
+            <height>41</height>
            </rect>
           </property>
           <property name="text">
@@ -378,10 +378,10 @@
        <widget class="QLabel" name="lbStatusOn">
         <property name="geometry">
          <rect>
-          <x>120</x>
+          <x>640</x>
           <y>0</y>
           <width>111</width>
-          <height>21</height>
+          <height>31</height>
          </rect>
         </property>
         <property name="text">
@@ -391,10 +391,10 @@
        <widget class="QLabel" name="lbStatusMode">
         <property name="geometry">
          <rect>
-          <x>260</x>
+          <x>800</x>
           <y>0</y>
           <width>111</width>
-          <height>20</height>
+          <height>31</height>
          </rect>
         </property>
         <property name="text">

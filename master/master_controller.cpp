@@ -2,12 +2,13 @@
 #include "ui_mainwindow.h"
 #include "datastruct.h"
 #include <QDate>
-#include<QMessageBox>
+#include <QMessageBox>
+#include <QTimer>
 
 /*
- * -------------------------------------------------------------
- *模块:主机控制台的界面跳转
- * -------------------------------------------------------------
+-------------------------------------------------------------
+模块:界面跳转
+-------------------------------------------------------------
 */
 //转入界面:启动控制
 void MainWindow::on_pbstart_clicked()
@@ -31,6 +32,7 @@ void MainWindow::on_temp_control_clicked()
 void MainWindow::on_slave_state_clicked()
 {
     showRoomState();
+    initTableRoomState();
     ui->stackedWidget->setCurrentIndex(3);
 }
 
@@ -41,9 +43,9 @@ void MainWindow::on_pbNetRecord_clicked()
 }
 
 /* 
- *---------------------------------------------------------
- *模块:主机控制台内的信号槽实现
- *---------------------------------------------------------
+---------------------------------------------------------
+模块:信号槽事件
+---------------------------------------------------------
 */
 
 //开机按钮
@@ -89,6 +91,7 @@ void MainWindow::on_pbModeCold_clicked()
     DEFAULT_TEMP = 22;
     setLbTemp(22);
     setLbStatusMode();
+    setModeInfo();
 }
 
 //切换至制热模式
@@ -99,6 +102,7 @@ void MainWindow::on_pbModeWarm_clicked()
     DEFAULT_TEMP = 28;
     setLbTemp(28);
     setLbStatusMode();
+    setModeInfo();
 }
 
 //升高默认温度
@@ -113,20 +117,13 @@ void MainWindow::on_temp_minus_clicked()
     setDefaultTemp(DEFAULT_TEMP-1);
 }
 
-//改变spinbox的值,获取到一个新的刷新频率,对数据库进行刷新操作
-/*
-# 每一次刷新,重新计算表room_state的属性"current_cost"的值
-# 计算方法:取出
-*/
-void MainWindow::on_boxRefreshFreq_valueChanged(double freq_value)
-{
 
-}
+
 
 /*
- *------------------------------------------------------------------
- *模块:功能函数实现
- *------------------------------------------------------------------
+------------------------------------------------------------------
+模块:功能函数实现
+------------------------------------------------------------------
 */
 
 //修改标签<主机开机状态显示>内容
@@ -153,15 +150,18 @@ void MainWindow::setLbStatusMode()
     }
 }
 
-//开机之后赋予MainWindow权限:
+
 /*
-#允许进行的按钮操作:
+---------------------开/关机权限设置-------------------------------------
+# 按钮: 关机 | 制冷 | 制热 | 升温 | 降温
+# 开机后生效,关机后无效
+-------------------------------------------------------------------------
 */
 void MainWindow::enableAccess()
 {
     ui->pbshutdown->setEnabled(true);
     ui->pbModeCold->setEnabled(true);
-    ui->pbModeCold->setEnabled(true);
+    ui->pbModeWarm->setEnabled(true);
     ui->temp_plus->setEnabled(true);
     ui->temp_minus->setEnabled(true);
 }
@@ -201,10 +201,53 @@ void MainWindow::setLbTemp(int temp)
     ui->lbDefaultTemp->setText(tr("%1").arg(temp));
 }
 
+//刷新操作:
 /*
-扩展功能:-----------------------------------------------------------------
-1.按钮事件:删除选中条目
-2.按钮事件:修改选中条目
+-------------------------更改刷新频率--------------------------------------------
+# 功能:
+# 改变spinbox的值,获取到一个新的刷新频率(freq=1,1min刷新一次),对累计电费实时刷新
+# 计算步骤
+---------------------------------------------------------------------------------
+*/
+void MainWindow::initTableRoomState()
+{
+    updateTimer = new QTimer(this);
+    connect(updateTimer,&QTimer::timeout,this,&MainWindow::updateTableRoomState);
+    connect(ui->boxRefreshFreq,SIGNAL(valueChanged(double)),this,SLOT(changeFreq(double)));
+    changeFreq(1.0);
+}
+
+void MainWindow::changeFreq(double newVal)
+{
+    updateTimer->stop();
+    updateTimer->setInterval(int(newVal*1000*60));
+    updateTimer->start();
+}
+
+
+/*
+------------------------刷新room_state表---------------------------------------------
+# 字段:|房间号|身份证号|当前温度|当前风速|当前费用|入住时间|最近一次开机时间|送风状态|
+# 函数流程
+# 遍历room_state,依次取出记录,对该记录:
+# 取出字段: last_open_time,in_connect, current_cost
+# 如果(!in_connect)则跳过该记录
+# 获取当前时间:current_time
+# quantum_time = max(current_time-freq,last_open_time)
+# current_cost += quantum_time * unitEnergy
+-------------------------------------------------------------------------------------
+*/
+void MainWindow::updateTableRoomState()
+{
+    
+}
+
+/*
+------------------------显示room_state表---------------------------------------------
+# 字段:|房间号|身份证号|当前温度|当前风速|当前费用|入住时间|最近一次开机时间|送风状态|
+# 扩展功能:删除一条记录
+# 扩展功能:修改一条记录
+-------------------------------------------------------------------------------------
 */
 void MainWindow::showRoomState()
 {
@@ -216,7 +259,8 @@ void MainWindow::showRoomState()
     roomStateModel->setHeaderData(roomStateModel->fieldIndex("current_wind"),Qt::Horizontal,"当前风速");
     roomStateModel->setHeaderData(roomStateModel->fieldIndex("current_cost"),Qt::Horizontal,"当前费用");
     roomStateModel->setHeaderData(roomStateModel->fieldIndex("check_in_time"),Qt::Horizontal,"入住时间");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("last_open_time"),Qt::Horizontal,"上一次开机时间");
+    roomStateModel->setHeaderData(roomStateModel->fieldIndex("last_open_time"),Qt::Horizontal,"最近开机时间");
+    roomStateModel->setHeaderData(roomStateModel->fieldIndex("in_connect"),Qt::Horizontal,"送风状态");
     roomStateModel->select();
     ui->slaveView->setModel(roomStateModel);
     //自适应填充窗口
@@ -230,9 +274,9 @@ void MainWindow::showRoomState()
 
 
 /*
- *------------------------------------------------------------------
- *模块:异常处理
- *------------------------------------------------------------------
+------------------------------------------------------------------
+模块:异常信息处理
+------------------------------------------------------------------
 */
 void MainWindow::hasOpenError()
 {
@@ -260,3 +304,7 @@ void MainWindow::setTempError()
     QMessageBox::information(this,tr("Notice"),tr("温度设置失败!"),QMessageBox::Ok);
 }
 
+void MainWindow::setModeInfo()
+{
+    QMessageBox::information(this,tr("Notice"),tr("主机工作模式已变更!"),QMessageBox::Ok);
+}

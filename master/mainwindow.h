@@ -61,7 +61,7 @@ private slots:
     void roomIdError();
     void infoIncompleteError();
     void checkOutError();
-    void updateLog(int room_id, QString check_in_time, QString user_id, double cost);
+    void insertTableLog(int room_id, QString check_in_time, QString user_id, double cost);
 
     void showRoomState();
     void hasOpenError();
@@ -96,11 +96,16 @@ private slots:
     void setTempError();
     void setLbTemp(int temp);
 
-
-    void on_boxRefreshFreq_valueChanged(double arg1);
     void on_pbExit_clicked();
     void refreshLeUser();
     void checkOutInfo();
+    void setModeInfo();
+    void initTableRoomState();
+    void updateTableRoomState();
+    void changeFreq(double value);
+
+    void insertTableRoomState(int room_id, QString user_id);
+    void deleteTableRoomState(int room_id);
 
 private:
     Ui::MainWindow *ui;
@@ -115,6 +120,7 @@ private:
     bool m_move;
     QPoint m_startPoint;
     QPoint m_windowPoint;
+    QTimer *updateTimer;
 };
 
 #endif // MAINWINDOW_H
