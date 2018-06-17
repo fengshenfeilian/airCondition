@@ -4,7 +4,11 @@
 #include <QDate>
 #include<QMessageBox>
 
-
+/*
+ * -------------------------------------------------------------
+ *模块:主机控制台的界面跳转
+ * -------------------------------------------------------------
+*/
 //转入界面:启动控制
 void MainWindow::on_pbstart_clicked()
 {
@@ -36,14 +40,13 @@ void MainWindow::on_pbNetRecord_clicked()
     ui->stackedWidget->setCurrentIndex(4);
 }
 
-
-
+/* 
+ *---------------------------------------------------------
+ *模块:主机控制台内的信号槽实现
+ *---------------------------------------------------------
+*/
 
 //开机按钮
-/*
-#设置主机状态 state = open
-#只有在state = open的情况下主机的操作才有效
-*/
 void MainWindow::on_pbopen_clicked()
 {
     if(state == OPEN){
@@ -62,8 +65,6 @@ void MainWindow::on_pbopen_clicked()
     }
 }
 
-
-
 //关机按钮
 void MainWindow::on_pbshutdown_clicked()
 {
@@ -79,30 +80,12 @@ void MainWindow::on_pbshutdown_clicked()
 }
 
 
-void MainWindow::setLbStatusOn()
+void MainWindow::on_pbModeCode_clicked()
 {
-   if(state == OPEN){
-        ui->lbStatusOn->setText(tr("主机状态:开机"));
-    }
-    else if(state == SHUTDOWN){
-        ui->lbStatusOn->setText(tr("主机状态:关机"));    
-    }else{
-       ui->lbStatusOn->setText(tr("主机状态:待机"));
-   }
+
 }
 
-void MainWindow::setLbStatusMode()
-{
-    if(state == OPEN){
-        if(workmode == COLDMODE)ui->lbStatusMode->setText(tr("工作模式:制冷"));
-        else ui->lbStatusMode->setText(tr("工作模式:制热"));
-    }else if (state == SHUTDOWN){
-        ui->lbStatusMode->setText(tr("工作模式:无"));
-    }
-}
-
-//模式切换按钮
-void MainWindow::on_pbmode_clicked()
+void MainWindow::on_pbModeWarm_clicked()
 {
 
 }
@@ -119,6 +102,35 @@ void MainWindow::on_temp_minus_clicked()
 
 }
 
+/*
+ *------------------------------------------------------------------
+ *模块:功能函数实现
+ *------------------------------------------------------------------
+*/
+
+//修改标签<主机开机状态显示>内容
+void MainWindow::setLbStatusOn()
+{
+   if(state == OPEN){
+        ui->lbStatusOn->setText(tr("主机状态:开机"));
+    }
+    else if(state == SHUTDOWN){
+        ui->lbStatusOn->setText(tr("主机状态:关机"));
+    }else{
+       ui->lbStatusOn->setText(tr("主机状态:待机"));
+   }
+}
+
+//修改标签<主机工作模式显示>内容
+void MainWindow::setLbStatusMode()
+{
+    if(state == OPEN){
+        if(workmode == COLDMODE)ui->lbStatusMode->setText(tr("工作模式:制冷"));
+        else ui->lbStatusMode->setText(tr("工作模式:制热"));
+    }else if (state == SHUTDOWN){
+        ui->lbStatusMode->setText(tr("工作模式:无"));
+    }
+}
 
 /*
 扩展功能:-----------------------------------------------------------------

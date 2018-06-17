@@ -11,12 +11,18 @@ MainWindow::MainWindow(QWidget *parent) :
   //  setWindowFlags(Qt::FramelessWindowHint | windowFlags());
     ui->setupUi(this);
     ui->tabWidget->setCurrentIndex(0);
-    setLbStatusOn();
+    initMainWindow();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::initMainWindow()
+{
+    setLbStatusOn();
+    setLbStatusMode();
 }
 
 
@@ -35,6 +41,4 @@ void MainWindow::on_tabWidget_currentChanged(int index)
         initializeLog();
    }
 }
-
-
 

@@ -44,8 +44,6 @@ private slots:
 
     void on_temp_minus_clicked();
 
-    void on_pbmode_clicked();
-
     void on_tabWidget_currentChanged(int index);
 
     void on_pbLogReset_clicked();
@@ -67,6 +65,11 @@ private slots:
     void closeSuccessInfo();
     void setLbStatusOn();
     void setLbStatusMode();
+    void initMainWindow();
+
+    void on_pbModeCode_clicked();
+
+    void on_pbModeWarm_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -76,7 +79,8 @@ private:
     QSqlTableModel *log_model;
     QSqlTableModel *roomStateModel;
 
-    const int DEFAULT_TEMP=25;
+    int DEFAULT_TEMP=25;
+    //int current_temp=DEFAULT_TEMP;
 };
 
 #endif // MAINWINDOW_H
