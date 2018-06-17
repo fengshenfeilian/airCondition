@@ -8,10 +8,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     CommonHelper::setStyle(":qdarkstyle/style.qss");
-  //  setWindowFlags(Qt::FramelessWindowHint | windowFlags());
+    setWindowFlags(Qt::FramelessWindowHint | windowFlags());
     ui->setupUi(this);
     ui->tabWidget->setCurrentIndex(0);
     initMainWindow();
+    m_move = false;
 }
 
 MainWindow::~MainWindow()
@@ -45,3 +46,8 @@ void MainWindow::on_tabWidget_currentChanged(int index)
    }
 }
 
+
+void MainWindow::on_pbExit_clicked()
+{
+    qApp->quit();
+}

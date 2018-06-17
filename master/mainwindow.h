@@ -13,6 +13,11 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+protected:
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     void showLogTable();
@@ -93,6 +98,8 @@ private slots:
 
 
     void on_boxRefreshFreq_valueChanged(double arg1);
+    void on_pbExit_clicked();
+    void refreshLeUser();
 
 private:
     Ui::MainWindow *ui;
@@ -103,7 +110,10 @@ private:
     QSqlTableModel *roomStateModel;
 
     int DEFAULT_TEMP=25;
-    //int current_temp=DEFAULT_TEMP;
+
+    bool m_move;
+    QPoint m_startPoint;
+    QPoint m_windowPoint;
 };
 
 #endif // MAINWINDOW_H

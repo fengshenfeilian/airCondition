@@ -35,6 +35,7 @@ void MainWindow::on_pbsignin_clicked()
     }else{
         roomIdError();
     }
+    refreshLeUser();
 
 }
 
@@ -63,6 +64,7 @@ void MainWindow::on_pbsignout_clicked()
     }else{
         roomIdError();
     }
+    refreshLeUser();
 
 }
 
@@ -126,6 +128,13 @@ void MainWindow::updateLog(int room_id, QString check_in_time, QString user_id, 
     insq.bindValue(3,user_id);
     insq.bindValue(4,cost);
     insq.exec();
+}
+
+void MainWindow::refreshLeUser()
+{
+    ui->leroomid->clear();
+    ui->leuserpwd->clear();
+    ui->leroomid->setFocus();
 }
 
 void MainWindow::infoIncompleteError()

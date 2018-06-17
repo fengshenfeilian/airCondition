@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     master_controller.cpp \
     user_controller.cpp \
     log.cpp \
-    NetController.cpp
+    NetController.cpp \
+    design.cpp
 
 HEADERS  += mainwindow.h \
     login.h \
