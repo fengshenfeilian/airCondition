@@ -29,6 +29,7 @@ void TcpClientSocket::dataReceived()
         return;
     }
     in >> Message;
+    qDebug() << Message;
     QByteArray string1 = Message.toUtf8();
     QJsonDocument ParseDocument = QJsonDocument::fromJson(string1);
     QJsonObject obj = ParseDocument.object();

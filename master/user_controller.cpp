@@ -131,8 +131,8 @@ void MainWindow::insertTableRoomState(int room_id,QString user_id)
     insq.prepare("insert into room_state(room_id,user_id,current_temp,current_wind,current_cost,check_in_time,last_open_time,in_connect) values (?,?,?,?,?,?,?,?)");
     insq.bindValue(0,room_id);
     insq.bindValue(1,user_id);
-    insq.bindValue(2,DEFAULT_TEMP);
-    insq.bindValue(3,0);
+    insq.bindValue(2,-1);
+    insq.bindValue(3,-0);
     insq.bindValue(4,0.0);
     insq.bindValue(5,check_in_time);
     insq.bindValue(6,"None");

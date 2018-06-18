@@ -53,7 +53,7 @@ void MainWindow::on_pbNetRecord_clicked()
 //开机按钮
 void MainWindow::on_pbopen_clicked()
 {
-    if(state == OPEN){
+    if(MasterState == OPEN){
         hasOpenError();
         return;
     }else{
@@ -62,7 +62,7 @@ void MainWindow::on_pbopen_clicked()
         }else{
             workmode=WARMMODE;
         }
-        state = OPEN;
+        MasterState = OPEN;
         setLbStatusOn();
         setLbStatusMode();
         enableAccess();
@@ -73,11 +73,11 @@ void MainWindow::on_pbopen_clicked()
 //关机按钮
 void MainWindow::on_pbshutdown_clicked()
 {
-    if(state == SHUTDOWN){
+    if(MasterState == SHUTDOWN){
         hasCloseError();
         return;
     }else{
-        state = SHUTDOWN;
+        MasterState = SHUTDOWN;
         setLbStatusOn();
         setLbStatusMode();
         unableAccess();
@@ -131,10 +131,10 @@ void MainWindow::on_temp_minus_clicked()
 //修改标签<主机开机状态显示>内容
 void MainWindow::setLbStatusOn()
 {
-   if(state == OPEN){
+   if(MasterState == OPEN){
         ui->lbStatusOn->setText(tr("主机状态: 开机"));
     }
-    else if(state == SHUTDOWN){
+    else if(MasterState == SHUTDOWN){
         ui->lbStatusOn->setText(tr("主机状态: 关机"));
     }else{
        ui->lbStatusOn->setText(tr("主机状态: 待机"));
@@ -144,10 +144,10 @@ void MainWindow::setLbStatusOn()
 //修改标签<主机工作模式显示>内容
 void MainWindow::setLbStatusMode()
 {
-    if(state == OPEN){
+    if(MasterState == OPEN){
         if(workmode == COLDMODE)ui->lbStatusMode->setText(tr("工作模式: 制冷"));
         else ui->lbStatusMode->setText(tr("工作模式: 制热"));
-    }else if (state == SHUTDOWN){
+    }else if (MasterState == SHUTDOWN){
         ui->lbStatusMode->setText(tr("工作模式: 无"));
     }
 }

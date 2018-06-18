@@ -10,7 +10,15 @@ enum state_type{
     WAIT,
     OPEN
 };
+enum ask_type{
+    SENDWIND = 0,
+    STOPWIND,
+    UPDATETEMP,
+    ASKLOGIN,
+    ASKLOGOUT
+};
 
+static int MasterState=SHUTDOWN;
 
  //subMachine info
 /*

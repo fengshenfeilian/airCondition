@@ -10,6 +10,7 @@
 #include <QMutex>
 #include "tcpclientsocket.h"
 #include "constant.h"
+#include "datastruct.h"
 
 class NetController : public QTcpServer
 {
@@ -30,7 +31,6 @@ public:
     void sendPowerOn(QTcpSocket*);
     void sendPowerOff(QTcpSocket*);
     void judgeLogin(int,QJsonObject obj);
-    void judgeLogout(int,QJsonObject obj);
     void judgeWindSupply(int,QJsonObject obj);
     void removeSlaveInfo(int,QJsonObject obj);
     void stopSlaveWind(int,QJsonObject obj);
@@ -39,8 +39,10 @@ public:
     void closeServer();
 
     bool loginSuccess(int room_id, QString user_id );
-    void insertTableNetinfo(QJsonObject);
-    void processMessage(int no, QJsonObject obj)
+    void logoutSuccess(int no, QJsonObject obj);
+    void insertTableNetinfo(QJsonObject obj, int objType);
+    void processMessage(int no, QJsonObject obj);
+    void updateTableRoomStateTup(QJsonObject obj, int sign);
     //void checkAdminInfo(QString id, QString password);
 
 
@@ -51,9 +53,13 @@ private:
     int port;//端口号
     QList<TcpClientSocket*> tcpClientSocketList;
 
+    QMap<int,TcpClientSocket*> room_list;
+    QTimer* billTimer;
+
 private slots:
     //void ReadMessage();
     void ReadMessage(int,QJsonObject);
+    void sendBillToSlave();//---------------------------new
 
 public slots:
     void slotDisconnected(int descriptor);

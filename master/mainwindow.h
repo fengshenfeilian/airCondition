@@ -3,8 +3,8 @@
 
 #include <QMainWindow>
 #include <QSqlTableModel>
-#include "datastruct.h"
 #include "NetController.h"
+#include "datastruct.h"
 
 namespace Ui {
 class MainWindow;
@@ -97,13 +97,13 @@ private:
     Ui::MainWindow *ui;
 
     bool workmode;
-    int state=SHUTDOWN;
     QSqlTableModel *logModel;
     QSqlTableModel *roomstateModel;
     QSqlTableModel *netinfoModel;
 
     int DEFAULT_TEMP=25;
     int reportType=0;
+    //int MasterState = SHUTDOWN;
 
     bool m_move;
     QPoint m_startPoint;
