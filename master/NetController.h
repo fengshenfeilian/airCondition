@@ -17,6 +17,7 @@ class NetController : public QTcpServer
 signals:
     void subMachineAskLogin();
     void sendAdminInfoToUi(bool );
+    void timeout();
 
 public:
     explicit NetController(QObject *parent = 0);
@@ -45,10 +46,13 @@ private:
     int no;//从机编号
     int port;//端口号
     QList<TcpClientSocket*> tcpClientSocketList;
+    QMap<int,TcpClientSocket*> room_list;
+    QTimer* billTimer;
 
 private slots:
     //void ReadMessage();
     void ReadMessage(int,QJsonObject);
+    void sendBillToSlave();
 
 public slots:
     void slotDisconnected(int descriptor);

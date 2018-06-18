@@ -74,7 +74,19 @@ void NetController::sendPowerOff(QTcpSocket* tsock){
 }
 //服务器监视socket
 
-
+void NetController::sendBillToSlave()
+{
+    for (QMap<int,TcpClientSocket*>::iterator it = room_list.begin();it != room_list.end();it++)
+    {
+        int roomid = it.key();
+        //查找到roomid对应的energy和cost
+        double energy = 0.0;
+        double cost = 0.0;
+        energy += 1.0;
+        cost += 1.0;
+        sendEnergyAndCost(it.value(),energy,cost);
+    }
+}
 
 void NetController::ReadMessage(int no,QJsonObject obj)
 {
@@ -156,6 +168,8 @@ void NetController::judgeLogin(int no,QJsonObject obj)
             break;
         }
     }
+    TcpClientSocket* broad_tcp = tcpClientSocket;
+    room_list.insert(id,broad_tcp);
     sendReply(tcpClientSocket,0,0,25);
     //登陆失败
     //sendReply(tcpClientSocket,1,0,25)
@@ -181,7 +195,7 @@ void NetController::judgeWindSupply(int no,QJsonObject obj){
 
 void NetController::removeSlaveInfo(int no,QJsonObject obj){
     int roomid = obj.value("Room").toInt();
-
+    room_list.remove(roomid);
     //room_list[roomid].clear();
     //从机关机
 }
@@ -228,7 +242,6 @@ void NetController::incomingConnection(qintptr socketDescriptor){
     tcpClientSocket->setSocketDescriptor(socketDescriptor);
     tcpClientSocket->setSocketOption(QAbstractSocket::LowDelayOption,1);
     tcpClientSocketList.append(tcpClientSocket);
-    qDebug() << "222\n";
 }
 
 void NetController::slotDisconnected(int descriptor){
@@ -247,20 +260,21 @@ void NetController::startListening()
 {
     no = 0;
     this->listen(QHostAddress::Any, port);
-    //this->billTimer = new QTimer();
-    //connect(billTimer, SIGNAL(timeout()), this, SLOT(sendBillToSlave()));
-    /*
+    this->billTimer = new QTimer();
+    connect(billTimer, SIGNAL(timeout()), this, SLOT(sendBillToSlave()));
+
     this->billTimer->start(5000); //默认五秒发送一次账单信息
-    this->refreshTimer = new QTimer();
+    /*this->refreshTimer = new QTimer();
     connect(refreshTimer, SIGNAL(timeout()), this, SLOT(sendStateQueryPackageToSlave()));
-    this->refreshTimer->start((int)(refreshRate * 1000));
-    emit sendUpdateInfoToUi(refreshRate, workMode, status);*/
+    this->refreshTimer->start((int)(refreshRate * 1000));*/
+    //emit sendUpdateInfoToUi(refreshRate, workMode, status);
 }
 
 void NetController::closeServer()
 {
-    /*billTimer->stop();
+    billTimer->stop();
     delete billTimer;
+    /*
     refreshTimer->stop();
     delete refreshTimer;
 */
