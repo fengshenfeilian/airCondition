@@ -27,6 +27,7 @@ void MainWindow::initMainWindow()
     setLbStatusMode();
     setLbTemp(DEFAULT_TEMP);
     unableAccess();
+    initTableRoomState();
    /* QMovie *movie = new QMovie("/home/marco/project/airCondition/master/images/movie.gif");
     ui->lbMovie->setMovie(movie);
     movie->start();

@@ -3,7 +3,9 @@
 #include "datastruct.h"
 #include <QDate>
 #include <QMessageBox>
+#include <QSqlQuery>
 #include <QTimer>
+#include <QDebug>
 
 /*
 -------------------------------------------------------------
@@ -32,7 +34,6 @@ void MainWindow::on_temp_control_clicked()
 void MainWindow::on_slave_state_clicked()
 {
     showRoomState();
-    initTableRoomState();
     ui->stackedWidget->setCurrentIndex(3);
 }
 
@@ -220,13 +221,13 @@ void MainWindow::initTableRoomState()
 void MainWindow::changeFreq(double newVal)
 {
     updateTimer->stop();
-    updateTimer->setInterval(int(newVal*1000*60));
+    updateTimer->setInterval(int(newVal*1000));
     updateTimer->start();
 }
 
 
 /*
-------------------------刷新room_state表---------------------------------------------
+------------------------刷新room_state表(bug bug bug)---------------------------------------------
 # 字段:|房间号|身份证号|当前温度|当前风速|当前费用|入住时间|最近一次开机时间|送风状态|
 # 函数流程
 # 遍历room_state,依次取出记录,对该记录:
@@ -239,7 +240,13 @@ void MainWindow::changeFreq(double newVal)
 */
 void MainWindow::updateTableRoomState()
 {
-    
+    QSqlQuery allq;
+    //qDebug()<<"fuck!!!!!";
+    allq.prepare("SELECT * FROM room_state");
+    allq.exec();
+  //  qDebug()<<allq.value(1).toInt();
+    while(allq.next()){
+    }
 }
 
 /*
