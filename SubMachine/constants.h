@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define IP "192.168.43.81"
+#define IP "10.206.17.69"
 #define PORT 6666
 #define LOW_WIND_CHAR '1'
 #define MID_WIND_CHAR '2'

@@ -17,9 +17,9 @@ int main(int argc, char *argv[])
         qDebug()<<"database open success";
     }
 
-   /* login w;
-    w.show();
-    */
+    //login w;
+    //w.show();
+
     MainWindow *w =new MainWindow();
     w->show();
 

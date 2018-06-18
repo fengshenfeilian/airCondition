@@ -64,6 +64,7 @@ private slots:
     void changeTargetTemp();
     int judgeTemp();
 //    void on_OpenClose_clicked();
+//    void on_DecreaseTemp_clicked();
 };
 
 #endif // MAINWINDOW_H

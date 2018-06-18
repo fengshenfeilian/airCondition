@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     master_controller.cpp \
     user_controller.cpp \
     log.cpp \
-    NetController.cpp
+    NetController.cpp \
+    tcpclientsocket.cpp
 
 HEADERS  += mainwindow.h \
     login.h \
@@ -28,7 +29,8 @@ HEADERS  += mainwindow.h \
     title_bar.h \
     datastruct.h \
     NetController.h \
-    constant.h
+    constant.h \
+    tcpclientsocket.h
 
 FORMS    += mainwindow.ui \
     login.ui

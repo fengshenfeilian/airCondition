@@ -6,6 +6,7 @@ netController::netController(QObject *parent) :
     QObject(parent)
 {
     BlockSize = 0;
+    isopen = true;
     tsock=new QTcpSocket(this);
     connect(tsock,SIGNAL(readyRead()),this,SLOT(ReadMessage()));
     connect(tsock,&QAbstractSocket::disconnected,this,&netController::lostconnect);
@@ -14,20 +15,23 @@ netController::netController(QObject *parent) :
 
 void netController::send(QJsonObject json)
 {
-    QJsonDocument doc;
-    doc.setObject(json);
-    QByteArray byte = doc.toJson(QJsonDocument::Compact);
-    QString str(byte);
-    QByteArray blocks;
-    QDataStream out(&blocks,QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_5_5);
-    out << (quint16)0;
-    out << str;
-    out.device()->seek(0);
-    out << (quint16)(blocks.size() - sizeof(quint16));
-    qDebug() << (quint16)(blocks.size() - sizeof(quint16)) << endl;
-    tsock->write(blocks);
-    qDebug() << "write block:" << blocks.size() << endl;
+    if(isopen){
+        QJsonDocument doc;
+        doc.setObject(json);
+        QByteArray byte = doc.toJson(QJsonDocument::Compact);
+        QString str(byte);
+        QByteArray blocks;
+        QDataStream out(&blocks,QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_5_5);
+        out << (quint16)0;
+        out << str;
+        out.device()->seek(0);
+        out << (quint16)(blocks.size() - sizeof(quint16));
+        tsock->write(blocks);
+//        tsock->waitForBytesWritten(100);
+        qDebug() << json.value("Type") << endl;
+    }else
+        qDebug() << "从机处于关机/待机状态..." << endl;
 }
 
 //发送送风请求
@@ -40,7 +44,7 @@ void netController::AskWindSupply(int roomid,int targettemp,int windspeed,int mo
         swr.insert("WindSpeed",windspeed);
         swr.insert("WindType",mode);
         send(swr);
-        qDebug() << "发出送风请求" << endl;
+//        qDebug() << "发出送风请求" << endl;
     }
 }
 //停止送风
@@ -144,14 +148,14 @@ void netController::ReadMessage(){
        return ;
    }
    in >> Message;
-   qDebug() << Message << endl;
    QByteArray string1 = Message.toUtf8();
    QJsonDocument parseDoc = QJsonDocument::fromJson(string1);
    QJsonObject obj = parseDoc.object();
    QString type;
-   if(obj.contains("Type"))
-      type = obj.value("Type").toString();
-//   QString type = obj.take("Type").toString();
+   if(obj.contains("Type")){
+        type = obj.value("Type").toString();
+   }
+   qDebug() <<"recv:"<< type << endl;
    if(type == "EnergyAndCost"){
        emit energyAndCost(obj);
    }
@@ -180,4 +184,8 @@ void netController::ReadMessage(){
 
 void netController::lostconnect(){
     emit centerPowerOff();
+}
+
+void netController::setIsOpen(bool m){
+    isopen = m;
 }

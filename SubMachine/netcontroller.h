@@ -37,10 +37,13 @@ public:
     void State(int roomid,int temp);
     void AskLogout(int roomid);
     void AskLogin(int roomid,QString id);
+    void setIsOpen(bool m);
 
 private:
     quint16 BlockSize;
     int pendingroomid;//used to restore roomid temporaily
+
+    bool isopen;
 
 private slots:
     void ReadMessage();

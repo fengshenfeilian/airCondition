@@ -1,129 +1,112 @@
 #include "NetController.h"
-NetController::NetController(QObject *parent) :
-    QObject(parent)
-{
-    mainserver=new QTcpServer(this);
-    //tsock = new QTcpSocket(this);
-    connect(mainserver,&QTcpServer::newConnection,this,&NetController::rr);
-    //qDebug() << "bind \n";
-    startserver();
-}
+#include "constant.h"
+#include "datastruct.h"
+#include "tcpclientsocket.h"
 
-void NetController::startserver(){
-    mainserver->listen(QHostAddress(QHostAddress::Any),6666);//set ip and port
+NetController::NetController(QObject *parent) :
+    QTcpServer(parent)
+{
+    this->port = 6666;
+    this->startListening();
+    qDebug() << "start\n";
 }
+/*
+void Server::checkAdminInfo(QString id, QString password)
+{
+    //管理员登陆成功
+    emit sendAdminInfoToUi(isCorrect);
+    if(isCorrect)
+        this->startListening();
+}
+*/
+
 //发送登陆请求回复
-void NetController::sendReply( int reply,int workmode,int worktemp){
+void NetController::sendReply(QTcpSocket* tsock,int reply,int workmode,int worktemp){
     QJsonObject rfl;
     rfl.insert("Type","ReplyForLogin");
     rfl.insert("Reply",reply);
     rfl.insert("WorkMode",workmode);
     rfl.insert("WorkTemperature",worktemp);
-    send(rfl);
+    send(tsock,rfl);
 }
 //发送能耗和费用信息
-void NetController::sendEnergyAndCost( double energy,double cost)
+void NetController::sendEnergyAndCost(QTcpSocket* tsock,double energy,double cost)
 {
     QJsonObject eac;
     eac.insert("Type","EnergyAndCost");
     eac.insert("Energy",energy);
     eac.insert("Cost",cost);
-    send(eac);
+    send(tsock,eac);
 }
 //发送接收状态信息回复
-void NetController::sendReplyForState( bool ack){
+void NetController::sendReplyForState(QTcpSocket* tsock,bool ack){
     QJsonObject rfs;
     rfs.insert("Type","ReplyForState");
     rfs.insert("Ack",ack);
-    send(rfs);
+    send(tsock,rfs);
 }
 //发送请求送风回复
-void NetController::sendReplyForWindSupply(bool ack){
+void NetController::sendReplyForWindSupply(QTcpSocket* tsock,bool ack){
     QJsonObject rfws;
     rfws.insert("Type","ReplyForWindSupply");
     rfws.insert("Ack",ack);
-    send(rfws);
+    send(tsock,rfws);
 }
 //发送停止送风回复
-void NetController::sendReplyForStopWindSupply(bool ack){
+void NetController::sendReplyForStopWindSupply(QTcpSocket* tsock,bool ack){
     QJsonObject rfs;
     rfs.insert("Type","ReplyForStopWindSupply");
     rfs.insert("Ack",ack);
-    send(rfs);
+    send(tsock,rfs);
 }
 //发送开机信号
-void NetController::sendPowerOn()
+void NetController::sendPowerOn(QTcpSocket* tsock)
 {
     QJsonObject po;
     po.insert("Type","PowerOn");
-    send(po);
+    send(tsock,po);
 }
 //发送关机信号
-void NetController::sendPowerOff(){
+void NetController::sendPowerOff(QTcpSocket* tsock){
     QJsonObject pof;
     pof.insert("Type","PowerOff");
-    send(pof);
+    send(tsock,pof);
 }
 //服务器监视socket
-void NetController::rr()
-{
-    QTcpSocket *tsock1;
-    //tcpList.push_back(mainserver->nextPendingConnection());
-    tsock1 = mainserver->nextPendingConnection();
-    tcpList.append(tsock1);
-    //tcpList.append(tsock);
-    connect(tsock1,&QTcpSocket::readyRead,this,&NetController::ReadMessage);
-    //connect(tsock,&QTcpSocket::disconnected,tsock,QTcpSocket::deleteLater);
-}
 
-void NetController::ReadMessage(){
-    for(int i = 0;i < tcpList.length();i++){
-           BlockSize = 0;
-           QDataStream in(tcpList.at(i));
-           QString Message;
-           in.setVersion(QDataStream::Qt_5_5);
-           //qDebug() << tsock->readAll() << endl;
-           if(BlockSize == 0){
-               if(tcpList.at(i)->bytesAvailable() < sizeof(quint16)){
-                  continue;
-               }
-               in >> BlockSize;
-           }
-           if(tcpList.at(i)->bytesAvailable() < BlockSize){
-               continue;
-           }
-           in >> Message;
-           QByteArray string1 = Message.toUtf8();
-           QJsonDocument parseDoc = QJsonDocument::fromJson(string1);
-           QJsonObject obj = parseDoc.object();
+
+
+void NetController::ReadMessage(int no,QJsonObject obj)
+{
+            qDebug() << "readmessage" << endl;
            QString type = obj.value("Type").toString();
            //从机请求登陆
            if(type == "AskLogin"){
                //进入判断函数，判断后进行后续操作
-               judgeLogin(obj);
+               judgeLogin(no,obj);
                //sendReply(0,0,25);
            }
            else if(type == "AskWindSupply"){
                //收到送风请求
-               judgeWindSupply(obj);
+               judgeWindSupply(no,obj);
                 //sendReplyForWindSupply(true);
            }
            else if(type == "StopWindSupply"){
                //停止送风
-               stopSlaveWind(obj);
-               sendReplyForStopWindSupply(true);
+               stopSlaveWind(no,obj);
+               //sendReplyForStopWindSupply(true);
            }
            else if(type == "State")
            {
                //维护从控表当前温度信息
-               modifySlaveTemp(obj);
-               sendReplyForState(true);
+               modifySlaveTemp(no,obj);
+               //sendReplyForState(no,true);
            }
            else if(type == "AskLogout")
            {
 
                //删除roomid_close的信息表
-               removeSlaveInfo(obj);
+               removeSlaveInfo(no,obj);
            }
            else if(type == "ReplyForEnergyAndCost")
            {
@@ -137,14 +120,12 @@ void NetController::ReadMessage(){
            {
                //不需要操作
            }
-           BlockSize = 0;
-    }
+
 
 }
 //子模块：发送JSON
-void NetController::send(QJsonObject json)
+void NetController::send(QTcpSocket* tsock,QJsonObject json)
 {
-    for(int i = 0;i < tcpList.length();i++){
         QJsonDocument doc;
         doc.setObject(json);
         QByteArray byte = doc.toJson(QJsonDocument::Compact);
@@ -156,37 +137,133 @@ void NetController::send(QJsonObject json)
         out << str;
         out.device()->seek(0);
         out << (quint16)(blocks.size() - sizeof(quint16));
-        tcpList.at(i)->write(blocks);
-    }
+        tsock->write(blocks);
+        //tcpList.removeFirst();
+        qDebug() << json.value("Type") << endl;
 }
 
-void NetController::judgeLogin(QJsonObject obj)
+void NetController::judgeLogin(int no,QJsonObject obj)
 {
-    int roomid = obj.value("Room").toInt();
+    int id = obj.value("Room").toInt();
     QString user_id = obj.value("ID").toString();
-    //登陆判断后续操作
+    //if登陆成功
+    TcpClientSocket* tcpClientSocket;
+    int index;
+    for(int i = 0; i < tcpClientSocketList.count(); i++){
+        tcpClientSocket = tcpClientSocketList.at(i);
+        if(tcpClientSocket->no == no){
+            index = i;
+            break;
+        }
+    }
+    sendReply(tcpClientSocket,0,0,25);
+    //登陆失败
+    //sendReply(tcpClientSocket,1,0,25)
 }
 
-void NetController::judgeWindSupply(QJsonObject obj){
+void NetController::judgeWindSupply(int no,QJsonObject obj){
     int roomid = obj.value("Room").toInt();
     int askTemp = obj.value("Temperature").toInt();
     int askWindSpeed = obj.value("WindSpeed").toInt();
     int windType = obj.value("WindType").toInt();
     //送风请求后续操作
+    TcpClientSocket* tcpClientSocket;
+    int index;
+    for(int i = 0; i < tcpClientSocketList.count(); i++){
+        tcpClientSocket = tcpClientSocketList.at(i);
+        if(tcpClientSocket->no == no){
+            index = i;
+            break;
+        }
+    }
+    sendReplyForWindSupply(tcpClientSocket,true);
 }
 
-void NetController::removeSlaveInfo(QJsonObject obj){
+void NetController::removeSlaveInfo(int no,QJsonObject obj){
     int roomid = obj.value("Room").toInt();
+
+    //room_list[roomid].clear();
     //从机关机
 }
 
-void NetController::stopSlaveWind(QJsonObject obj){
+void NetController::stopSlaveWind(int no,QJsonObject obj){
     int roomid = obj.value("Room").toInt();
+    TcpClientSocket* tcpClientSocket;
+    int index;
+    for(int i = 0; i < tcpClientSocketList.count(); i++){
+        tcpClientSocket = tcpClientSocketList.at(i);
+        if(tcpClientSocket->no == no){
+            index = i;
+            break;
+        }
+    }
     //从机停风
+    sendReplyForStopWindSupply(tcpClientSocket,true);
 }
 
-void NetController::modifySlaveTemp(QJsonObject obj){
+void NetController::modifySlaveTemp(int no,QJsonObject obj){
     int roomid = obj.value("Room").toInt();
     int current_temp = obj.value("Temperature").toInt();
     //从机的当前温度
+    TcpClientSocket* tcpClientSocket;
+    int index;
+    for(int i = 0; i < tcpClientSocketList.count(); i++){
+        tcpClientSocket = tcpClientSocketList.at(i);
+        if(tcpClientSocket->no == no){
+            index = i;
+            break;
+        }
+    }
+    sendReplyForState(tcpClientSocket,true);
+}
+
+void NetController::incomingConnection(qintptr socketDescriptor){
+    TcpClientSocket *tcpClientSocket = new TcpClientSocket(this);
+    tcpClientSocket->no = this->no;
+    no++;
+    connect(tcpClientSocket,SIGNAL(sendToServer(int,QJsonObject)),
+            this,SLOT(ReadMessage(int,QJsonObject)));
+    connect(tcpClientSocket,SIGNAL(disconnected(int)),
+            this,SLOT(slotDisconnected(int)));
+    tcpClientSocket->setSocketDescriptor(socketDescriptor);
+    tcpClientSocket->setSocketOption(QAbstractSocket::LowDelayOption,1);
+    tcpClientSocketList.append(tcpClientSocket);
+    qDebug() << "222\n";
+}
+
+void NetController::slotDisconnected(int descriptor){
+    for(int i=0;i<tcpClientSocketList.count();i++){
+        TcpClientSocket *item = tcpClientSocketList.at(i);
+        if(item->socketDescriptor() == descriptor){
+//            int no = item->no;
+            tcpClientSocketList.removeAt(i);
+            return;
+        }
+    }
+    return;
+}
+
+void NetController::startListening()
+{
+    no = 0;
+    this->listen(QHostAddress::Any, port);
+    //this->billTimer = new QTimer();
+    //connect(billTimer, SIGNAL(timeout()), this, SLOT(sendBillToSlave()));
+    /*
+    this->billTimer->start(5000); //默认五秒发送一次账单信息
+    this->refreshTimer = new QTimer();
+    connect(refreshTimer, SIGNAL(timeout()), this, SLOT(sendStateQueryPackageToSlave()));
+    this->refreshTimer->start((int)(refreshRate * 1000));
+    emit sendUpdateInfoToUi(refreshRate, workMode, status);*/
+}
+
+void NetController::closeServer()
+{
+    /*billTimer->stop();
+    delete billTimer;
+    refreshTimer->stop();
+    delete refreshTimer;
+*/
+    this->tcpClientSocketList.clear();
+    this->close();
 }

@@ -1,10 +1,10 @@
 #ifndef DATASTRUCT_H
 #define DATASTRUCT_H
 #include <QString>
-const int COOLMODE = 0;
-const int HEATMODE = 1;
+const int COLDMODE = 0;
+const int WARMMODE = 1;
 
-int DEFAULT_TEMP;
+//int DEFAULT_TEMP = 25;
 
 enum state_type{
     SHUTDOWN = 0,

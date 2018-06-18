@@ -3,7 +3,8 @@
 
 #include <QMainWindow>
 #include <QSqlTableModel>
-
+#include "NetController.h"
+#include "constant.h"
 namespace Ui {
 class MainWindow;
 }
@@ -35,8 +36,6 @@ private slots:
 
     void on_pbopen_clicked();
 
-    void on_pbwait_clicked();
-
     void on_pbshutdown_clicked();
 
     void on_temp_plus_clicked();
@@ -51,12 +50,28 @@ private slots:
 
     void on_pbLogRefresh_clicked();
 
+    void checkIn(int room_id, QString user_id);
+
+    void checkOut(int room_id, QString user_id);
+    void roomIdError();
+    void infoIncompleteError();
+    void checkOutError();
+    void updateLog(int room_id, QString check_in_time, QString user_id, double cost);
+
+
+
+    void on_pbNetRecord_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     bool workmode;
     int state;
     QSqlTableModel *log_model;
+    QSqlTableModel *roomStateModel;
+    NetController netcon;
+
+    int DEFAULT_TEMP=25;
 };
 
 #endif // MAINWINDOW_H

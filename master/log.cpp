@@ -64,7 +64,4 @@ void MainWindow::on_pbLogRefresh_clicked()
 
 }
 
-void MainWindow::showLogTable()
-{
 
-}
