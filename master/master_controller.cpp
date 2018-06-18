@@ -203,54 +203,6 @@ void MainWindow::setLbTemp(int temp)
     ui->lbDefaultTemp->setText(tr("%1").arg(temp));
 }
 
-//刷新操作:
-/*
--------------------------更改刷新频率--------------------------------------------
-# 功能:
-# 改变spinbox的值,获取到一个新的刷新频率(freq=1,1min刷新一次),对累计电费实时刷新
-# 计算步骤
----------------------------------------------------------------------------------
-*/
-void MainWindow::initTableRoomState()
-{
-    updateTimer = new QTimer(this);
-    connect(updateTimer,&QTimer::timeout,this,&MainWindow::updateTableRoomState);
-    connect(ui->boxRefreshFreq,SIGNAL(valueChanged(double)),this,SLOT(changeFreq(double)));
-    changeFreq(1.0);
-    QSqlQuery initq;
-    initq.exec("update room_state SET in_connect=0");
-}
-
-void MainWindow::changeFreq(double newVal)
-{
-    updateTimer->stop();
-    updateTimer->setInterval(int(newVal*1000));
-    updateTimer->start();
-}
-
-
-/*
-------------------------刷新room_state表(bug bug bug)---------------------------------------------
-# 字段:|房间号|身份证号|当前温度|当前风速|当前费用|入住时间|最近一次开机时间|送风状态|
-# 函数流程
-# 遍历room_state,依次取出记录,对该记录:
-# 取出字段: last_open_time,in_connect, current_cost
-# 如果(wind = 0 || !in_connect)则跳过该记录
-# 获取当前时间:current_time
-# quantum_time = max(current_time-freq,last_open_time)
-# current_cost += quantum_time * 1(0.8,1.3) * 电费(5元)
--------------------------------------------------------------------------------------
-*/
-void MainWindow::updateTableRoomState()
-{
-    QSqlQuery allq;
-    //qDebug()<<"fuck!!!!!";
-    allq.prepare("SELECT * FROM room_state");
-    allq.exec();
-  //  qDebug()<<allq.value(1).toInt();
-    while(allq.next()){
-    }
-}
 
 /*
 ------------------------显示room_state表---------------------------------------------
@@ -304,6 +256,53 @@ void MainWindow::showTableNetinfo()
         ui->netinfoView->setColumnWidth(i, ui->netinfoView->columnWidth(i)+20);
     }
     ui->netinfoView->horizontalHeader()->setStretchLastSection(true);
+}
+
+//刷新操作:
+/*
+-------------------------更改刷新频率--------------------------------------------
+# 功能:
+# 改变spinbox的值,获取到一个新的刷新频率(freq=1,1min刷新一次),对累计电费实时刷新
+# 计算步骤
+---------------------------------------------------------------------------------
+*/
+void MainWindow::initTableRoomState()
+{
+    updateTimer = new QTimer(this);
+    connect(updateTimer,&QTimer::timeout,this,&MainWindow::updateTableRoomState);
+    connect(ui->boxRefreshFreq,SIGNAL(valueChanged(double)),this,SLOT(changeFreq(double)));
+    changeFreq(1.0);
+    QSqlQuery initq;
+    initq.exec("update room_state SET in_connect=0");
+}
+
+void MainWindow::changeFreq(double newVal)
+{
+    updateTimer->stop();
+    updateTimer->setInterval(int(newVal*1000));
+    updateTimer->start();
+}
+/*
+------------------------刷新room_state表(bug bug bug)---------------------------------------------
+# 字段:|房间号|身份证号|当前温度|当前风速|当前费用|入住时间|最近一次开机时间|送风状态|
+# 函数流程
+# 遍历room_state,依次取出记录,对该记录:
+# 取出字段: last_open_time,in_connect, current_cost
+# 如果(wind = 0 || !in_connect)则跳过该记录
+# 获取当前时间:current_time
+# quantum_time = max(current_time-freq,last_open_time)
+# current_cost += quantum_time * 1(0.8,1.3) * 电费(5元)
+-------------------------------------------------------------------------------------
+*/
+void MainWindow::updateTableRoomState()
+{
+    QSqlQuery allq;
+    //qDebug()<<"fuck!!!!!";
+    allq.prepare("SELECT * FROM room_state");
+    allq.exec();
+  //  qDebug()<<allq.value(1).toInt();
+    while(allq.next()){
+    }
 }
 
 /*
