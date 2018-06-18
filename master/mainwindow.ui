@@ -138,7 +138,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>4</number>
         </property>
         <widget class="QWidget" name="page">
          <widget class="QPushButton" name="pbopen">
@@ -277,8 +277,24 @@
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
+           <item row="0" column="6">
+            <widget class="QLineEdit" name="lineEdit"/>
+           </item>
            <item row="0" column="2">
             <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_2">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -297,23 +313,10 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="6">
-            <widget class="QLineEdit" name="lineEdit"/>
-           </item>
-           <item row="1" column="0" colspan="7">
-            <widget class="QTableView" name="slaveView"/>
-           </item>
-           <item row="2" column="0">
-            <widget class="QPushButton" name="pbDelSlave">
+           <item row="0" column="4">
+            <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>删除选中条目</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QPushButton" name="pbUpdateSlave">
-             <property name="text">
-              <string>修改选中条目</string>
+              <string>输入关键字以搜索数据库:         </string>
              </property>
             </widget>
            </item>
@@ -324,15 +327,25 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>输入关键字以搜索数据库:         </string>
-             </property>
-            </widget>
+           <item row="1" column="0" colspan="7">
+            <widget class="QTableView" name="slaveView"/>
            </item>
-           <item row="0" column="3">
-            <spacer name="horizontalSpacer_2">
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="page_5">
+         <widget class="QWidget" name="gridLayoutWidget_5">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>801</width>
+            <height>371</height>
+           </rect>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="0">
+            <spacer name="horizontalSpacer_6">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -344,10 +357,22 @@
              </property>
             </spacer>
            </item>
+           <item row="0" column="2">
+            <widget class="QComboBox" name="comboBox_2"/>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="lbRoomId">
+             <property name="text">
+              <string>房间号:  </string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="3">
+            <widget class="QTableView" name="netinfoView"/>
+           </item>
           </layout>
          </widget>
         </widget>
-        <widget class="QWidget" name="page_5"/>
        </widget>
        <widget class="QPushButton" name="mode_control">
         <property name="geometry">
@@ -455,16 +480,19 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page_6">
+         <property name="toolTipDuration">
+          <number>-10</number>
+         </property>
          <widget class="QWidget" name="gridLayoutWidget_2">
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>10</y>
+            <y>20</y>
             <width>681</width>
-            <height>401</height>
+            <height>391</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_5">
@@ -484,15 +512,31 @@
            <item row="1" column="0" colspan="4">
             <widget class="QTableWidget" name="tableWidget"/>
            </item>
-           <item row="0" column="0">
-            <widget class="QPushButton" name="pbReportDaySearch">
-             <property name="text">
-              <string>搜索(日报表)</string>
+           <item row="0" column="1">
+            <widget class="QDateEdit" name="dateEdit_2">
+             <property name="toolTipDuration">
+              <number>-9</number>
+             </property>
+             <property name="layoutDirection">
+              <enum>Qt::LeftToRight</enum>
+             </property>
+             <property name="currentSection">
+              <enum>QDateTimeEdit::MonthSection</enum>
+             </property>
+             <property name="displayFormat">
+              <string>MMM/d</string>
+             </property>
+             <property name="calendarPopup">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QDateEdit" name="dateEdit_2"/>
+           <item row="2" column="0" colspan="3">
+            <widget class="QPushButton" name="pbRefreshDay">
+             <property name="text">
+              <string>刷新</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -501,24 +545,21 @@
          <widget class="QWidget" name="gridLayoutWidget_3">
           <property name="geometry">
            <rect>
-            <x>10</x>
-            <y>10</y>
-            <width>671</width>
+            <x>0</x>
+            <y>20</y>
+            <width>681</width>
             <height>391</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
-           <item row="0" column="0">
-            <widget class="QPushButton" name="pbReportWeekSearch">
+           <item row="2" column="0" colspan="2">
+            <widget class="QPushButton" name="pbRefreshWeek">
              <property name="text">
-              <string>搜索(周报表)</string>
+              <string>刷新</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="3">
-            <widget class="QTableView" name="tableView"/>
-           </item>
-           <item row="0" column="2">
+           <item row="0" column="1">
             <spacer name="horizontalSpacer_4">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -531,8 +572,11 @@
              </property>
             </spacer>
            </item>
-           <item row="0" column="1">
-            <widget class="QDateEdit" name="dateEdit_3"/>
+           <item row="1" column="0" colspan="2">
+            <widget class="QTableView" name="tableView"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QComboBox" name="boxWeek"/>
            </item>
           </layout>
          </widget>
@@ -542,21 +586,14 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>0</y>
-            <width>691</width>
-            <height>411</height>
+            <y>20</y>
+            <width>681</width>
+            <height>391</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_7">
            <item row="1" column="0" colspan="3">
             <widget class="QTableView" name="tableView_2"/>
-           </item>
-           <item row="0" column="0">
-            <widget class="QPushButton" name="pbReportMonSearch">
-             <property name="text">
-              <string>搜索(月报表)</string>
-             </property>
-            </widget>
            </item>
            <item row="0" column="2">
             <spacer name="horizontalSpacer_5">
@@ -571,8 +608,22 @@
              </property>
             </spacer>
            </item>
-           <item row="0" column="1">
-            <widget class="QDateEdit" name="dateEdit_4"/>
+           <item row="2" column="0" colspan="3">
+            <widget class="QPushButton" name="pbRefreshMon">
+             <property name="text">
+              <string>刷新</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QComboBox" name="boxMon">
+             <property name="currentText">
+              <string/>
+             </property>
+             <property name="currentIndex">
+              <number>-1</number>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>

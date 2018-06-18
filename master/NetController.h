@@ -7,40 +7,57 @@
 #include <QMap>
 #include <QList>
 #include <QTimer>
+#include <QMutex>
+#include "tcpclientsocket.h"
 #include "constant.h"
 
-class NetController : public QObject
+class NetController : public QTcpServer
 {
     Q_OBJECT
 signals:
     void subMachineAskLogin();
+    void sendAdminInfoToUi(bool );
 
 public:
     explicit NetController(QObject *parent = 0);
-    void send(QJsonObject json);
-    void sendReply(int,int,int);
-    void startserver();
-    void sendEnergyAndCost(double energy,double cost);
-    void sendReplyForState(bool ack);
-    void sendReplyForWindSupply(bool ack);
-    void sendReplyForStopWindSupply(bool ack);
-    void sendPowerOn();
-    void sendPowerOff();
-    void judgeLogin(QJsonObject obj);
-    void judgeWindSupply(QJsonObject obj);
-    void removeSlaveInfo(QJsonObject obj);
-    void stopSlaveWind(QJsonObject obj);
-    void modifySlaveTemp(QJsonObject obj);
+    void send(QTcpSocket*,QJsonObject json);
+    void sendReply(QTcpSocket*,int,int,int);
+    //void startserver();
+    void sendEnergyAndCost(QTcpSocket*,double energy,double cost);
+    void sendReplyForState(QTcpSocket*,bool ack);
+    void sendReplyForWindSupply(QTcpSocket*,bool ack);
+    void sendReplyForStopWindSupply(QTcpSocket*,bool ack);
+    void sendPowerOn(QTcpSocket*);
+    void sendPowerOff(QTcpSocket*);
+    void judgeLogin(int,QJsonObject obj);
+    void judgeWindSupply(int,QJsonObject obj);
+    void removeSlaveInfo(int,QJsonObject obj);
+    void stopSlaveWind(int,QJsonObject obj);
+    void modifySlaveTemp(int,QJsonObject obj);
+    void startListening();
+    void closeServer();
+
+    bool loginSuccess(int room_id, QString user_id );
+    void insertTableNetinfo(QJsonObject);
+    //void checkAdminInfo(QString id, QString password);
+
 
 private:
-    QTcpServer *mainserver;
     quint16 BlockSize = 0;
-    QTcpSocket *tsock;
-    QList<QTcpSocket*> tcpList;
+
+    int no;//从机编号
+    int port;//端口号
+    QList<TcpClientSocket*> tcpClientSocketList;
 
 private slots:
-    void ReadMessage();
-    void rr();
+    //void ReadMessage();
+    void ReadMessage(int,QJsonObject);
+
+public slots:
+    void slotDisconnected(int descriptor);
+
+protected:
+    void incomingConnection(qintptr socketDescriptor);
 };
 
 #endif // NETCONTROLLOR_H

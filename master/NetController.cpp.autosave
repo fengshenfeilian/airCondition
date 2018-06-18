@@ -355,7 +355,9 @@ void NetController::closeServer()
     this->close();
 }
 
+//AskOpen
 void NetController::insertTableNetinfo(QJsonObject obj)
 {
-
+    int roomid = obj.value("Room").toInt();
+    QString userid = obj.value("ID").toString();
 }

@@ -62,11 +62,6 @@ using namespace std;
 #define MID_WIND_SPEED 2
 #define HIGH_WIND_SPEED 3
 
-#define COLD_WIND false
-#define WARM_WIND true
-
-#define COLDMODE false
-#define WARMMODE true
 
 #define PORT 6666
 #define IP "192.168.43.81"

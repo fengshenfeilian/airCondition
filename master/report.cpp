@@ -6,36 +6,37 @@ void MainWindow::initializeReport()
 
 }
 
+//daily
 void MainWindow::on_pbReportDay_clicked()
 {
     ui->reportStack->setCurrentIndex(0);
+    reportType = 0;
+    updateTableReport();
 }
 
+//weekly
 void MainWindow::on_pbReportWeek_clicked()
 {
     ui->reportStack->setCurrentIndex(1);
+    reportType = 1;
+    updateTableReport();
 }
 
+//monthly
 void MainWindow::on_pbReportMon_clicked()
 {
     ui->reportStack->setCurrentIndex(2);
+    reportType = 2;
+    updateTableReport();
+
 }
 
-void MainWindow::on_pbReportDaySearch_clicked()
+
+
+void MainWindow::updateTableReport()
 {
 
 }
-
-void MainWindow::on_pbReportWeekSearch_clicked()
-{
-
-}
-
-void MainWindow::on_pbReportMonSearch_clicked()
-{
-
-}
-
 /*
 温控信息表:  
 请求开始时间 | 请求结束时间 | 房间号 | 用户号 | 是否包含开机请求(0 or 1) | 当前温度 | 目标温度 | 目标风速(1,2,3) | 累计费用 |

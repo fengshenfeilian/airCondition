@@ -40,6 +40,7 @@ void MainWindow::on_slave_state_clicked()
 //转入界面:温控请求信息显示
 void MainWindow::on_pbNetRecord_clicked()
 {
+    showTableNetinfo();
     ui->stackedWidget->setCurrentIndex(4);
 }
 
@@ -216,6 +217,8 @@ void MainWindow::initTableRoomState()
     connect(updateTimer,&QTimer::timeout,this,&MainWindow::updateTableRoomState);
     connect(ui->boxRefreshFreq,SIGNAL(valueChanged(double)),this,SLOT(changeFreq(double)));
     changeFreq(1.0);
+    QSqlQuery initq;
+    initq.exec("update room_state SET in_connect=0");
 }
 
 void MainWindow::changeFreq(double newVal)
@@ -232,10 +235,10 @@ void MainWindow::changeFreq(double newVal)
 # 函数流程
 # 遍历room_state,依次取出记录,对该记录:
 # 取出字段: last_open_time,in_connect, current_cost
-# 如果(!in_connect)则跳过该记录
+# 如果(wind = 0 || !in_connect)则跳过该记录
 # 获取当前时间:current_time
 # quantum_time = max(current_time-freq,last_open_time)
-# current_cost += quantum_time * unitEnergy
+# current_cost += quantum_time * 1(0.8,1.3) * 电费(5元)
 -------------------------------------------------------------------------------------
 */
 void MainWindow::updateTableRoomState()
@@ -258,18 +261,18 @@ void MainWindow::updateTableRoomState()
 */
 void MainWindow::showRoomState()
 {
-    roomStateModel = new QSqlTableModel(this);
-    roomStateModel->setTable("room_state");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("room_id"),Qt::Horizontal,"房间号");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("user_id"),Qt::Horizontal,"身份证号");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("current_temp"),Qt::Horizontal,"当前温度");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("current_wind"),Qt::Horizontal,"当前风速");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("current_cost"),Qt::Horizontal,"当前费用");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("check_in_time"),Qt::Horizontal,"入住时间");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("last_open_time"),Qt::Horizontal,"最近开机时间");
-    roomStateModel->setHeaderData(roomStateModel->fieldIndex("in_connect"),Qt::Horizontal,"送风状态");
-    roomStateModel->select();
-    ui->slaveView->setModel(roomStateModel);
+    roomstateModel = new QSqlTableModel(this);
+    roomstateModel->setTable("room_state");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("room_id"),Qt::Horizontal,"房间号");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("user_id"),Qt::Horizontal,"身份证号");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("current_temp"),Qt::Horizontal,"当前温度");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("current_wind"),Qt::Horizontal,"当前风速");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("current_cost"),Qt::Horizontal,"当前费用");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("check_in_time"),Qt::Horizontal,"入住时间");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("last_open_time"),Qt::Horizontal,"最近开机时间");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("in_connect"),Qt::Horizontal,"连接状态");
+    roomstateModel->select();
+    ui->slaveView->setModel(roomstateModel);
     //自适应填充窗口
     ui->slaveView->resizeColumnsToContents();
     ui->slaveView->horizontalHeader();
@@ -279,6 +282,30 @@ void MainWindow::showRoomState()
     ui->slaveView->horizontalHeader()->setStretchLastSection(true);
 }
 
+void MainWindow::showTableNetinfo()
+{
+    netinfoModel = new QSqlTableModel(this);
+    netinfoModel->setTable("netinfo");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("room_id"),Qt::Horizontal,"房间号");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("start_time"),Qt::Horizontal,"请求开始时间");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("end_time"),Qt::Horizontal,"请求结束时间");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("user_id"),Qt::Horizontal,"身份证号");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("is_open"),Qt::Horizontal,"开机请求");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("current_temp"),Qt::Horizontal,"当前温度");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("target_temp"),Qt::Horizontal,"目标温度");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("target_wind"),Qt::Horizontal,"目标风速");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("cost"),Qt::Horizontal,"费用");
+    netinfoModel->select();
+    ui->netinfoView->setModel(netinfoModel);
+    //自适应填充窗口
+    ui->netinfoView->resizeColumnsToContents();
+    ui->netinfoView->horizontalHeader();
+    for(int i = 0; i < ui->netinfoView->horizontalHeader()->count(); i++){
+        ui->netinfoView->setColumnWidth(i, ui->netinfoView->columnWidth(i)+20);
+    }
+    ui->netinfoView->horizontalHeader()->setStretchLastSection(true);
+
+}
 
 /*
 ------------------------------------------------------------------

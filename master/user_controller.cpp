@@ -121,6 +121,11 @@ void MainWindow::insertTableRoomState(int room_id,QString user_id)
     //获取登记时间
     QDateTime t =QDateTime::currentDateTime();
     QString check_in_time = t.toString("yyyy-MM-dd hh:mm:ss ddd");
+
+    //debug-----------------------------------------------------------------------------------------
+    //qDebug()<<t.currentMSecsSinceEpoch();
+
+
     QSqlQuery insq;
     //向表room_state插入记录
     insq.prepare("insert into room_state(room_id,user_id,current_temp,current_wind,current_cost,check_in_time,last_open_time,in_connect) values (?,?,?,?,?,?,?,?)");
