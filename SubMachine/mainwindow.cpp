@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     usedenergy=0.0;
     isopen=false;
     this->setWindowFlags(Qt::FramelessWindowHint);//隐藏标题栏
+    netcon.tsock = log.get_nct();
 
     //use button group to make wind speed buttons exclusive
     windSpeedGroup=new QButtonGroup(this);
@@ -33,18 +34,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->DecreaseTemp,&QPushButton::clicked,this,&MainWindow::decreaseTargetTemp);
 
     regresstemptimer=new QTimer(this);
-    regresstemptimer->setInterval(1000);//regress temperature per 1 sec
+    regresstemptimer->setInterval(2000);//regress temperature per 1 sec
     connect(regresstemptimer,&QTimer::timeout,this,&MainWindow::regressTemp);
-
+/*
     setdelaytimer=new QTimer(this);
     setdelaytimer->setSingleShot(true);
     setdelaytimer->setInterval(1000);//temperature will update until 1 sec with no operation
-//    connect(setdelaytimer,&QTimer::timeout,this,&MainWindow::changeTargetTemp);
-
+    connect(setdelaytimer,&QTimer::timeout,this,&MainWindow::changeTargetTemp);*/
+/*
     judgetimer=new QTimer(this);
-    judgetimer->setInterval(1000);
+    judgetimer->setInterval(5000);
     connect(judgetimer,&QTimer::timeout,this,&MainWindow::judgeTemp);
-
+*/
     //connect with net controller
 
     connect(&netcon,&netController::recvWind,this,&MainWindow::ReceiveWind);
@@ -92,7 +93,9 @@ void MainWindow::OpenMachine(int roomid,QJsonObject obj){
     this->roomid = roomid;
     currentmode=obj.take("WorkMode").toInt();
     targettemp=temp_targettemp=obj.take("WorkTemperature").toInt();
+
     roomtemp = targettemp;
+    qDebug() << "roomtemp:" << roomtemp;
     ui->SetTemp->setText(tr("%1").arg(targettemp));
     if(currentmode==0){
         ui->CurrentMode->setText("制冷");
@@ -104,7 +107,7 @@ void MainWindow::OpenMachine(int roomid,QJsonObject obj){
     if(isopen==false){
         isopen=true;
         targetWind = 2;
-        currentwindspeed = 2;
+        currentwindspeed = 0;
         ui->RoomID->setText(tr("%1").arg(roomid));
         ui->OpenClose->setText("关机");
         ui->OpenClose->setEnabled(true);
@@ -125,7 +128,7 @@ void MainWindow::OpenMachine(int roomid,QJsonObject obj){
 
         generateRoomTemp();
         receivecnt=1;
-        judgetimer->start();
+        //judgetimer->start();
         regresstemptimer->start();
     }
     this->show();
@@ -148,7 +151,7 @@ void MainWindow::CloseMachine(){
     ui->UsedEnergy->setText("--");
     ui->UsedFee->setText("--");
     //stop all timer
-    judgetimer->stop();
+    //judgetimer->stop();
     regresstemptimer->stop();
     this->close();
 }
@@ -242,14 +245,14 @@ void MainWindow::decreaseTargetTemp(){
         if(temp_targettemp>18){
             temp_targettemp--;
             ui->SetTemp->setText(tr("%1").arg(temp_targettemp));
-            setdelaytimer->start();
+            //setdelaytimer->start();
         }
     }
     else{
         if(temp_targettemp>25){
             temp_targettemp--;
             ui->SetTemp->setText(tr("%1").arg(temp_targettemp));
-            setdelaytimer->start();
+            //setdelaytimer->start();
         }
     }
      targettemp = temp_targettemp;
@@ -284,22 +287,24 @@ void MainWindow::regressTemp(){
         ++modeCnt[currentwindspeed];
         switch(currentwindspeed){
         case 0:
-            if(modeCnt[currentwindspeed]%5 == 0){
+            if(modeCnt[currentwindspeed]%15 == 0){
                 roomtemp ++;
             }
             break;
         case 1:
-            if(modeCnt[currentwindspeed]%5 == 0){
+            if(modeCnt[currentwindspeed]%15 == 0){
                 roomtemp--;
             }
             break;
         case 2:
-            if(modeCnt[currentwindspeed]%3 == 0){
+            if(modeCnt[currentwindspeed]%10 == 0){
                 roomtemp--;
             }
             break;
         default:
-            roomtemp --;
+            if(modeCnt[currentwindspeed]%5 == 0){
+                roomtemp--;
+            }
             break;
         }
 
@@ -359,8 +364,13 @@ int MainWindow::judgeTemp(){
 }
 
 void MainWindow::SetEnergy(QJsonObject obj){
-    usedfee = obj.take("Cost").toDouble();
-    usedenergy = obj.take("Energy").toDouble();
+    qDebug() << obj.value("Cost");
+    usedfee = obj.value("Cost").toDouble();
+    usedenergy = obj.value("Energy").toDouble();
+    qDebug() << usedfee;
+    qDebug() << usedenergy;
+    ui->UsedEnergy->setText(tr("%1").arg(usedenergy));
+    ui->UsedFee->setText(tr("%1").arg(usedfee));
 }
 
 void MainWindow::StopWind(QJsonObject obj){
@@ -406,4 +416,14 @@ void MainWindow::restart(){
     //start all timer
     judgetimer->start();
 //    regresstemptimer->start();
+}
+
+void MainWindow::on_OpenClose_clicked()
+{
+
+}
+
+void MainWindow::on_DecreaseTemp_clicked()
+{
+
 }

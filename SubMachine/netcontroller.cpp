@@ -10,6 +10,11 @@ netController::netController(QObject *parent) :
     tsock=new QTcpSocket(this);
     connect(tsock,SIGNAL(readyRead()),this,SLOT(ReadMessage()));
     connect(tsock,&QAbstractSocket::disconnected,this,&netController::lostconnect);
+    //tsock->connectToHost(IP,PORT);
+}
+
+void netController::connectIP()
+{
     tsock->connectToHost(IP,PORT);
 }
 
@@ -28,7 +33,7 @@ void netController::send(QJsonObject json)
         out.device()->seek(0);
         out << (quint16)(blocks.size() - sizeof(quint16));
         tsock->write(blocks);
-//        tsock->waitForBytesWritten(100);
+        tsock->waitForBytesWritten(300);
         qDebug() << json.value("Type") << endl;
     }else
         qDebug() << "从机处于关机/待机状态..." << endl;

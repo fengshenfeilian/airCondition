@@ -19,6 +19,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void setRoomID(int newval);
+    int judgeTemp();
 public slots:
     void openFailed();
     void onWindSpeedClick();
@@ -62,9 +63,11 @@ private:
 private slots:
     void regressTemp();
     void changeTargetTemp();
-    int judgeTemp();
+
 //    void on_OpenClose_clicked();
 //    void on_DecreaseTemp_clicked();
+    void on_OpenClose_clicked();
+    void on_DecreaseTemp_clicked();
 };
 
 #endif // MAINWINDOW_H

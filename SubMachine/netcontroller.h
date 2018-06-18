@@ -38,6 +38,7 @@ public:
     void AskLogout(int roomid);
     void AskLogin(int roomid,QString id);
     void setIsOpen(bool m);
+    void connectIP();
 
 private:
     quint16 BlockSize;
