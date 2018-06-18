@@ -30,6 +30,7 @@ public:
     void sendPowerOn(QTcpSocket*);
     void sendPowerOff(QTcpSocket*);
     void judgeLogin(int,QJsonObject obj);
+    void judgeLogout(int,QJsonObject obj);
     void judgeWindSupply(int,QJsonObject obj);
     void removeSlaveInfo(int,QJsonObject obj);
     void stopSlaveWind(int,QJsonObject obj);
@@ -39,6 +40,7 @@ public:
 
     bool loginSuccess(int room_id, QString user_id );
     void insertTableNetinfo(QJsonObject);
+    void processMessage(int no, QJsonObject obj)
     //void checkAdminInfo(QString id, QString password);
 
 

@@ -304,7 +304,6 @@ void MainWindow::showTableNetinfo()
         ui->netinfoView->setColumnWidth(i, ui->netinfoView->columnWidth(i)+20);
     }
     ui->netinfoView->horizontalHeader()->setStretchLastSection(true);
-
 }
 
 /*

@@ -91,6 +91,7 @@ private slots:
     void updateTableReport();
 
     void showTableNetinfo();
+    //void updateTableRoomStateTup();
 
 private:
     Ui::MainWindow *ui;

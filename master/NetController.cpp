@@ -5,16 +5,12 @@
 #include <QSqlQuery>
 #include <QSqlTableModel>
 
-
-
 //在什么情况下修改数据库表
 /*
 送风和停风请求:修改 room_state: wind,last_open_time,in_connect
 定时发state(current temp)信息,修改 current_temp
 从机关机请求: 修改room_state表: in_connect = 0, current_wind = 0 current_temp = -1;
 */
-
-
 
 /*
 //温控请求信息表:
@@ -30,9 +26,8 @@ end_time text not null,
 cost double not null,
 primary key(room_id,start_time)
 );
-
 #如何更新end_time?
-当下一个同房间的请求发来的时候,更新当前请求的end_time
+#当下一个同房间的请求发来的时候,更新当前请求的end_time
 */
 
 /*
@@ -136,54 +131,77 @@ void NetController::sendPowerOff(QTcpSocket* tsock){
 void NetController::ReadMessage(int no,QJsonObject obj)
 {
            qDebug() << "readmessage" << endl;
-           QString type = obj.value("Type").toString();
-           //从机请求登陆
-           if(type == "AskLogin"){
-               judgeLogin(no,obj);
-               insertTableNetinfo(obj);
+           if(state == OPEN){
+               processMessage(int no,QJsonObject obj);
+           }else if (state == WAIT){
+               state = OPEN;
+               processMessage(int no, QJsonObject obj);
            }
-           else if(type == "AskWindSupply"){
-               //收到送风请求
-               //updateTableRoomStateTup();
-               //insertTableNetInfo();
-               judgeWindSupply(no,obj);
-                //sendReplyForWindSupply(true);
-           }
-           else if(type == "StopWindSupply"){
-               //停止送风
-               //handleStop();
-               //updateTableNetInfo();
-               stopSlaveWind(no,obj);
-               //sendReplyForStopWindSupply(true);
-           }
-           else if(type == "State")
-           {
-               //维护从控表当前温度信息
-               //upstateTableRoomStateTup();
-               modifySlaveTemp(no,obj);
-               //sendReplyForState(no,true);
-           }
-           else if(type == "AskLogout")
-           {
-               //删除roomid_close的信息表
-               //updateTableRoomStateTup();
-               removeSlaveInfo(no,obj);
-           }
-           else if(type == "ReplyForEnergyAndCost")
-           {
-               //不需要操作
-           }
-           else if(type == "ReplyForPowerOn")
-           {
-               //不需要操作
-           }
-           else if(type == "ReplyForPoserOff")
-           {
-               //不需要操作
-           }
-
-
 }
+
+/*
+----------------------------------------数据包处理模块------------------------------
+#共收到五种包:
+# 从机请求登录 | 从机请求注销 | 从机送风请求 | 从机停风请求 | 从机当前温度
+#不同包需要处理的不同字段:
+#从机请求登录: 更新<is_connect>信息
+#从机请求注销: 更新<is_connect>信息；更新<current_wind>信息；更新<current_temp>信息
+#维护数据表netinfoTable
+
+#需要发送的包:
+# 当前累计费用
+------------------------------------------------------------------------------------
+*/
+void NetController::processMessage(int no, QJsonObject obj)
+{
+    QString type = obj.value("Type").toString();
+    //从机请求登录
+    if(type == "AskLogin"){
+        judgeLogin(no,obj);//-------------------------------------------------ok
+    }
+    //收到送风请求
+    else if(type == "AskWindSupply"){
+        //updateTableRoomStateTup();
+        //insertTableNetInfo();
+        judgeWindSupply(no,obj);
+         //sendReplyForWindSupply(true);
+    }
+    //收到停止送风请求
+    else if(type == "StopWindSupply"){
+        //handleStop();
+        //updateTableNetInfo();
+        stopSlaveWind(no,obj);
+        //sendReplyForStopWindSupply(true);
+    }
+    else if(type == "State")
+    {
+        //维护从控表->当前温度信息
+        //upstateTableRoomStateTup();
+        modifySlaveTemp(no,obj);
+        //sendReplyForState(no,true);
+    }
+    else if(type == "AskLogout")
+    {
+        //删除roomid_close的信息表
+        //updateTableRoomStateTup();
+        removeSlaveInfo(no,obj);
+        judgeLogout(no,obj);
+    }
+    else if(type == "ReplyForEnergyAndCost")
+    {
+        //不需要操作
+    }
+    else if(type == "ReplyForPowerOn")
+    {
+        //不需要操作
+    }
+    else if(type == "ReplyForPoserOff")
+    {
+        //不需要操作
+    }
+    insertTableNetinfo(obj);
+}
+
 //子模块：发送JSON
 void NetController::send(QTcpSocket* tsock,QJsonObject json)
 {
@@ -201,50 +219,6 @@ void NetController::send(QTcpSocket* tsock,QJsonObject json)
         tsock->write(blocks);
         //tcpList.removeFirst();
         qDebug() << json.value("Type") << endl;
-}
-
-void NetController::judgeLogin(int no,QJsonObject obj)
-{
-    int id = obj.value("Room").toInt();
-    QString user_id = obj.value("ID").toString();
-    TcpClientSocket* tcpClientSocket;
-    int index;
-    for(int i = 0; i < tcpClientSocketList.count(); i++){
-        tcpClientSocket = tcpClientSocketList.at(i);
-        if(tcpClientSocket->no == no){
-            index = i;
-            break;
-        }
-     }
-    //if(房间号与身份证号匹配,且 !in_connect )登录成功
-    if(loginSuccess(id,user_id)){
-        sendReply(tcpClientSocket,0,0,25);
-    }else{
-        sendReply(tcpClientSocket,1,0,25);
-    }
-}
-
-bool NetController::loginSuccess(int room_id,QString user_id)
-{
-    QSqlQuery q;
-    q.prepare("SELECT * FROM room_state WHERE room_id=:rid AND user_id=:uid");
-    q.bindValue(":rid",room_id);
-    q.bindValue(":uid",user_id);
-    q.exec();
-    if(q.next()){
-        int in_connect = q.value(7).toInt();
-        if(in_connect){
-            return 0;
-        }else{
-            q.prepare("UPDATE room_state SET in_connect=:connect_info WHERE room_id=:rid");
-            q.bindValue(":connect_info",1);
-            q.bindValue(":rid",room_id);
-            q.exec();
-            return 1;
-        }
-    }else{
-        return 0;
-    }
 }
 
 void NetController::judgeWindSupply(int no,QJsonObject obj){
@@ -355,7 +329,87 @@ void NetController::closeServer()
     this->close();
 }
 
+
+/*
+-------------------------从机登录校验模块-----------------------------------------
+#在room_state中查找由<room_id,user_id>唯一标识的tuple
+#如果成功找到,则判断从机是否已建立连接(in_connect)
+#与从机建立连接(in_connect=1)
+#更新数据表room_state
+----------------------------------------------------------------------------------
+*/
+void NetController::judgeLogin(int no,QJsonObject obj)
+{
+    int id = obj.value("Room").toInt();
+    QString user_id = obj.value("ID").toString();
+    TcpClientSocket* tcpClientSocket;
+    int index;
+    for(int i = 0; i < tcpClientSocketList.count(); i++){
+        tcpClientSocket = tcpClientSocketList.at(i);
+        if(tcpClientSocket->no == no){
+            index = i;
+            break;
+        }
+     }
+    //if(房间号与身份证号匹配,且 !in_connect )登录成功
+    if(loginSuccess(id,user_id)){
+        sendReply(tcpClientSocket,0,0,25);
+    }else{
+        sendReply(tcpClientSocket,1,0,25);
+    }
+}
+
+bool NetController::loginSuccess(int room_id,QString user_id)
+{
+    QSqlQuery q;
+    q.prepare("SELECT * FROM room_state WHERE room_id=:rid AND user_id=:uid");
+    q.bindValue(":rid",room_id);
+    q.bindValue(":uid",user_id);
+    q.exec();
+    if(q.next()){
+        int in_connect = q.value(7).toInt();
+        if(in_connect){
+            return 0;
+        }else{
+            q.prepare("UPDATE room_state SET in_connect=:connect_info WHERE room_id=:rid");
+            q.bindValue(":connect_info",1);
+            q.bindValue(":rid",room_id);
+            q.exec();
+            return 1;
+        }
+    }else{
+        return 0;
+    }
+}
+
+void NetController::judgeLogout(int no, QJsonObject obj)
+{
+    int id = obj.value("Room").toInt();
+    QString user_id = obj.value("ID").toString();
+    TcpClientSocket* tcpClientSocket;
+    int index;
+    for(int i = 0; i < tcpClientSocketList.count(); i++){
+        tcpClientSocket = tcpClientSocketList.at(i);
+        if(tcpClientSocket->no == no){
+            index = i;
+            break;
+        }
+     }
+}
+
+/*
+--------------------------温控请求表处理模块--------------------------------------
+
+----------------------------------------------------------------------------------
+*/
+
 void NetController::insertTableNetinfo(QJsonObject obj)
 {
+    //AskOpenSlave
+    int roomid = obj.value("Room").toInt();
+    QString userid = obj.value("ID").toString();
+    QDateTime start_time_text =QDateTime::currentDateTime();
+    QString start_time = start_time_text.toString("yyyy-MM-dd hh:mm:ss ddd");
 
 }
+
