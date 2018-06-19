@@ -2,15 +2,10 @@
 #include "constant.h"
 #include "datastruct.h"
 #include "tcpclientsocket.h"
+#include "mainwindow.h"
 #include <QSqlQuery>
 #include <QSqlTableModel>
 #include <QString>
-
-//在什么情况下修改数据库表
-/*
-送风和停风请求:修改 room_state: wind,last_open_time,in_connect
-定时发state(current temp)信息,修改 current_temp
-*/
 
 /*
 #如何更新end_time?
@@ -109,10 +104,14 @@ void NetController::sendPowerOff(QTcpSocket* tsock){
 //服务器监视socket
 void NetController::ReadMessage(int no,QJsonObject obj)
 {
-       qDebug() << "readmessage" << endl;
-       qDebug() << obj <<endl;
-      // qDebug()<<MasterState<<endl;
+   emit toMainWindow();
+   int state = this->MasterState;
+   qDebug() << "readmessage:" << endl;
+   qDebug() << obj <<endl;
+   if(state == OPEN || state == WAIT){
+       state = OPEN;
        processMessage(no,obj);
+   }
 }
 
 /*
@@ -130,8 +129,6 @@ void NetController::ReadMessage(int no,QJsonObject obj)
 */
 void NetController::processMessage(int no, QJsonObject obj)
 {
-    //qDebug()<<"fuck!!!!!!!!!!!!!!!!!!!!!!!!!!<<endl";
-                                             //--------------------------------------------debug
     QString type = obj.value("Type").toString();
     //从机请求登录
     if(type == "AskLogin"){
@@ -160,9 +157,10 @@ void NetController::processMessage(int no, QJsonObject obj)
         //sendReplyForState(no,true);
     }
     //删除roomid_close的信息表
-    else if(type == "AskLogout"){
-        removeSlaveInfo(no,obj);
-        logoutSuccess(no,obj);
+    else if(type == "AskLogout"){   //------------------------------------------ok
+        int id = obj.value("Room").toInt();
+//        removeSlaveInfo(id);
+        logoutSuccess(obj);
         insertTableNetinfo(obj,ASKLOGOUT);
     }
     else if(type == "ReplyForEnergyAndCost" || type == "ReplyForPowerOn" || type == "ReplyForPoserOff"){
@@ -208,11 +206,12 @@ void NetController::judgeWindSupply(int no,QJsonObject obj){
     sendReplyForWindSupply(tcpClientSocket,true);
 }
 
-void NetController::removeSlaveInfo(int no,QJsonObject obj){
-    int roomid = obj.value("Room").toInt();
-    room_list.remove(roomid);
-
-    //room_list[roomid].clear();
+void NetController::removeSlaveInfo(int room_id){
+    if(room_list.contains(room_id))
+    {
+        room_list[room_id]->close();
+        room_list.remove(room_id);
+    }
     //从机关机
 }
 
@@ -312,7 +311,9 @@ void NetController::closeServer()
 */
 void NetController::judgeLogin(int no,QJsonObject obj)
 {
-    //qDebug()<<"fuck!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl; //------------------------------debug
+    emit toMainWindow2();
+    emit toMainWindow3();
+   // qDebug() << this->MasterState << "************************************";
     int id = obj.value("Room").toInt();
     QString user_id = obj.value("ID").toString();
     TcpClientSocket* tcpClientSocket;
@@ -325,17 +326,21 @@ void NetController::judgeLogin(int no,QJsonObject obj)
         }
      }
     //if(房间号与身份证号匹配,且 !in_connect )登录成功
-    if(loginSuccess(id,user_id)){
+    int logAck;
+    if(loginSuccess(obj)){
         TcpClientSocket* broad_tcp = tcpClientSocket;//--------------------------new
         room_list.insert(id,broad_tcp);
-        sendReply(tcpClientSocket,0,0,25);
+        logAck = 0;
     }else{
-        sendReply(tcpClientSocket,1,0,25);
+        logAck = 1;
     }
+    sendReply(tcpClientSocket,logAck,this->workmode,this->DEFAULT_TEMP);
 }
 
-bool NetController::loginSuccess(int room_id,QString user_id)
+bool NetController::loginSuccess(QJsonObject obj)
 {
+    int room_id = obj.value("Room").toInt();
+    QString user_id = obj.value("ID").toString();
     QSqlQuery q;
     q.prepare("SELECT * FROM room_state WHERE room_id=:rid AND user_id=:uid");
     q.bindValue(":rid",room_id);
@@ -346,14 +351,7 @@ bool NetController::loginSuccess(int room_id,QString user_id)
         if(in_connect){
             return 0;
         }else{
-            QDateTime t_text =QDateTime::currentDateTime();
-            QString t = t_text.toString("yyyy-MM-dd hh:mm:ss ddd");
-
-            q.prepare("UPDATE room_state SET in_connect=:connect_info,last_open_time=:time WHERE room_id=:rid");
-            q.bindValue(":connect_info",1);
-            q.bindValue(":time",t);
-            q.bindValue(":rid",room_id);
-            q.exec();
+            updateTableRoomStateTup(obj,ASKLOGIN);
             return 1;
         }
     }else{
@@ -371,7 +369,7 @@ bool NetController::loginSuccess(int room_id,QString user_id)
 ----------------------------------------------------------------------------------
 */
 
-void NetController::logoutSuccess(int no, QJsonObject obj)
+void NetController::logoutSuccess(QJsonObject obj)
 {
     int room_id = obj.value("Room").toInt();
     QSqlQuery q;
@@ -379,13 +377,7 @@ void NetController::logoutSuccess(int no, QJsonObject obj)
     q.bindValue(":rid",room_id);
     q.exec();
     if(q.next()){
-        qDebug() << "22\n";
-        int in_connect = q.value(7).toInt();
-        q.prepare("UPDATE room_state SET in_connect=:connect_info,current_wind=:cwind,current_temp=:ctemp WHERE room_id=:rid");
-        q.bindValue(":connect_info",0);
-        q.bindValue(":rid",room_id);
-        q.bindValue(":cwind",0);
-        q.bindValue(":ctemp",-1);
+        updateTableRoomStateTup(obj,ASKLOGOUT);
         q.exec();
         return;
     }
@@ -393,41 +385,233 @@ void NetController::logoutSuccess(int no, QJsonObject obj)
 }
 
 /*
---------------------------温控请求表处理模块--------------------------------------
-#1.更新表room_state
-#2.向表netinfo插入新数据
-#3.函数接收参数: <obj,obj_type>
-
+--------------------------room_state更新模块--------------------------------------
+SENDWIND: current_wind
+STOPWIND: current_wind = 0,
+UPDATETEMP: current_tep
+ASKLOGIN:   last_open_time=current time, in_connect=1
+ASKLOGOUT:  current_wind=0, current_temp=-1 in_connect=0;
 ----------------------------------------------------------------------------------
 */
-
+/*
+-----------------------------------roomstate表字段----------------------------------------------------------
+room_id | user_id  | current_temp  | current_wind  | current_cost  | check_in_time | last_open_time | in_connect
+----------------------------------------------------------------------------------------------------------
+*/
 void NetController::updateTableRoomStateTup(QJsonObject obj, int objType)
 {
+    int room_id = obj.value("Room").toInt();
+    QString user_id;
+    int current_temp,current_wind,in_connect;
 
+    QSqlQuery q;
+    QDateTime t_text =QDateTime::currentDateTime();
+    QString t = t_text.toString("yyyy-MM-dd hh:mm:ss ddd");
+
+    switch(objType){
+    case SENDWIND:
+        //current_temp =obj.value("Temperature").toInt();
+        current_wind = obj.value("WindSpeed").toInt();
+        q.prepare("UPDATE room_state SET current_wind=:cwind WHERE room_id=:rid");
+        q.bindValue(":cwind",current_wind);
+        q.bindValue(":rid",room_id);
+        q.exec();
+        break;
+    case STOPWIND:
+        q.prepare("UPDATE room_state SET current_wind=0 WHERE room_id=:rid");
+        q.bindValue(":rid",user_id);
+        q.exec();
+        break;
+    case UPDATETEMP:
+        current_temp = obj.value("Temperature").toInt();
+        q.prepare("UPDATE room_state SET current_temp=:ctemp WHERE room_id=:rid");
+        q.bindValue(":ctemp",current_temp); //更新当前温度
+        q.bindValue(":rid",room_id);
+        q.exec();
+        break;
+    case ASKLOGIN:
+        q.prepare("UPDATE room_state SET in_connect=:connect_info,last_open_time=:time WHERE room_id=:rid");
+        q.bindValue(":connect_info",1); //建立连接
+        q.bindValue(":time",t); //更新登录时间
+        q.bindValue(":rid",room_id);
+        q.exec();
+
+        break;
+    case ASKLOGOUT:
+        q.prepare("UPDATE room_state SET in_connect=:connect_info,current_wind=:cwind,current_temp=:ctemp WHERE room_id=:rid");
+        q.bindValue(":connect_info",0);  //断开连接
+        q.bindValue(":rid",room_id);
+        q.bindValue(":cwind",0);    //风速为0
+        q.bindValue(":ctemp",-1); //从控机温度未知
+        q.exec();
+        break;
+    }
 }
 
+
+
+/*
+----------------------------------netinfo插入模块-------------------------------------
+*/
+/*
+-----------------------------------netinfo表字段----------------------------------------------------------
+room_id | start_time  | end_time  | user_id  | is_open  | current_temp | target_temp | target_wind  | cost | run
+----------------------------------------------------------------------------------------------------------
+*/
 void NetController::insertTableNetinfo(QJsonObject obj,int objType)
 {
-    //AskOpenSlave
-    int roomid = obj.value("Room").toInt();
-    QString userid = obj.value("ID").toString();
-    QDateTime start_time_text =QDateTime::currentDateTime();
-    QString start_time = start_time_text.toString("yyyy-MM-dd hh:mm:ss ddd");
+    int room_id = obj.value("Room").toInt();
+    int target_temp;
+    int target_wind;
+    int current_wind;
+    int current_temp;
+    int run;
+    int m_time;
+    double current_cost;
+    QString user_id,start_time,end_time;
+    QDateTime time1,time2;
+
+    time1 = QDateTime::currentDateTime(); //start_time
+    start_time = time1.toString("yyyy-MM-dd hh:mm:ss ddd");
+
+    QSqlQuery q;
+    // user_id | current_temp
+    q.prepare("SELECT * FROM room_state WHERE room_id=:rid");
+    q.bindValue(":rid",room_id);
+    q.exec();
+    if (q.next()){
+        user_id = q.value(3).toString();
+        current_temp = q.value(5).toInt();
+    }
+
+    switch(objType){
+    //送风请求
+    case  SENDWIND:
+        killAsk(room_id);
+        target_temp = obj.value("Temperature").toInt();
+        target_wind = obj.value("WindSpeed").toInt();
+        run = 1;
+        end_time = "--";
+        q.prepare("INSERT INTO netinfo (room_id,start_time,end_time,user_id,is_open,current_temp,target_temp,target_wind,cost,run) values (?,?,?,?,?,?,?,?,?,?)");
+        q.bindValue(0,room_id);
+        q.bindValue(1,start_time);
+        q.bindValue(2,end_time);
+        q.bindValue(3,user_id);
+        q.bindValue(4,0);
+        q.bindValue(5,current_temp);
+        q.bindValue(6,target_temp);
+        q.bindValue(7,target_wind);
+        q.bindValue(8,0.0);
+        q.bindValue(9,run);
+        q.exec();
+       // qDebug()<<start_time<<" "<<end_time<<" "<<user_id<<" "<<current_temp<<" "<<target_temp<<" "<<target_wind<<endl;
+     //   qDebug()<<objType<< "fuck!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<room_id<<endl;
+        break;
+    //停风请求
+    case  STOPWIND:
+        killAsk(room_id);
+        break;
+    case  UPDATETEMP:  //定时显示温度,这个信息不需要保存
+        //current_temp = obj.value("Temprature").toInt();
+        break;
+    case  ASKLOGIN: //登录信息,需要保存
+        break;
+    case  ASKLOGOUT:   //注销信息,不需要保存
+        killAsk(room_id);
+        break;
+    }
 
 }
 
 
-//---------------------------------------------------------------------------------readTableRoomState
+//------------------------------结束当前正在响应的请求-----------------------
+//一个房间(room_id)只能同时响应一个请求
+void NetController::killAsk(int room_id)
+{
+    //找到房间号为room_id,并且正在运行的请求
+    QSqlQuery q;
+    q.prepare("SELECT * FROM netinfo WHERE room_id=:rid AND run=1");
+    q.bindValue(":rid",room_id);
+    q.exec();
+    if(q.next()){
+        QString start_time = q.value(1).toString();
+        int current_wind = q.value(7).toInt();
+
+        QString end_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
+
+        QDateTime time1 = QDateTime::fromString(start_time,"yyyy-MM-dd hh:mm:ss ddd");
+        QDateTime time2 = QDateTime::fromString(end_time,"yyyy-MM-dd hh:mm:ss ddd");
+        //计算两个时间的时间差
+        int m_time = getMinuteTo(time1,time2);
+
+        qDebug()<<"fuck!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+        qDebug()<<m_time<<endl;
+
+        double current_cost = WindRate[current_wind] * m_time * PowerRate;
+        q.prepare("UPDATE netinfo SET end_time=:etime,cost=:cost,run=:run WHERE room_id=:rid AND run=1");
+        q.bindValue(":etime",end_time);
+        q.bindValue(":cost",current_cost);
+        q.bindValue(":rid",room_id);
+        q.bindValue(":run",0);
+        q.exec();
+    }
+}
+
+//--------------------------------向从控机发送当前累计费用信息------------------------
 void NetController::sendBillToSlave()
 {
     for (QMap<int,TcpClientSocket*>::iterator it = room_list.begin();it != room_list.end();it++)
     {
-        int roomid = it.key();
+        int room_id = it.key();
         //查找到roomid对应的energy和cost
-        double energy = 0.0;
-        double cost = 0.0;
-        energy += 1.0;
-        cost += 1.0;
+        double energy = getEnergyFromTableRoomState(room_id);
+        double cost = energy * PowerRate;
         sendEnergyAndCost(it.value(),energy,cost);
     }
+}
+
+double NetController::getEnergyFromTableRoomState(int room_id)
+{
+    QSqlQuery q;
+    q.prepare("SELECT current_cost FROM room_state WHERE room_id=:rid");
+    q.bindValue(":rid",room_id);
+    q.exec();
+    double energy = q.value(0).toInt();
+    return energy;
+}
+
+//------------------获取MainWindow实体属性<MasterState>,<DEFAULT_TEMP>-----------------------
+void NetController::recvStateFromMainWindow(int val){
+    this->MasterState = val;
+}
+
+void NetController::recvTempFromMainWindow(int val){
+    this->DEFAULT_TEMP = val;
+}
+
+int NetController::getMinuteTo(QDateTime t1, QDateTime t2)
+{
+    int sec = t1.secsTo(t2);
+    int minute = sec/60;
+    return minute;
+}
+
+void NetController::sendPowerOffToSlave()
+{
+    for (QMap<int,TcpClientSocket*>::iterator it = room_list.begin();it != room_list.end();it++)
+    {
+        sendPowerOff(it.value());
+    }
+}
+
+void NetController::sendPowerOnToSlave()
+{
+    for (QMap<int,TcpClientSocket*>::iterator it = room_list.begin();it != room_list.end();it++)
+    {
+        sendPowerOn(it.value());
+    }
+}
+
+void NetController::recvWorkmodeFromMainWindow(int val){
+    this->workmode = val;
 }

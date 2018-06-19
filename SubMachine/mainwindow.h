@@ -19,7 +19,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     void setRoomID(int newval);
-    int judgeTemp();
 public slots:
     void openFailed();
     void onWindSpeedClick();
@@ -33,18 +32,26 @@ public slots:
     void handleOpenClose();
     void increaseTargetTemp();
     void decreaseTargetTemp();
-    void mySleep(int mesc);
+    void CheckOut();
+    void setFreq(int);
 
 //    void show_mainwindow(QJsonObject);
-
+signals:
+    void askWindSupply(int,int,int,int);
+    void setisopen(bool);
+    void askLogin(int,QString);
+    void askLogout(int);
+    void state(int,int);
+    void stopWindSupply(int);
+//    void askLogout2();
 private:
-    netController netcon;
-    login log;
+//    netController netcon;
+//    login log;
     Ui::MainWindow *ui;
     QButtonGroup *windSpeedGroup;
     QTimer *regresstemptimer;
-    QTimer *setdelaytimer;
-    QTimer *judgetimer;
+//    QTimer *setdelaytimer;
+//    QTimer *judgetimer;
 
     int isopen;
     int currentmode;//0:coldmode,1:warm mode
@@ -64,7 +71,9 @@ private:
 private slots:
     void regressTemp();
     void changeTargetTemp();
-    void on_DecreaseTemp_clicked();
+    int judgeTemp();
+//    void on_OpenClose_clicked();
+//    void on_DecreaseTemp_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -66,6 +66,7 @@ void MainWindow::on_pbsignout_clicked()
     }else{
         roomIdError();
     }
+    emit tuifang(room_id);
     refreshLeUser();
 
 }

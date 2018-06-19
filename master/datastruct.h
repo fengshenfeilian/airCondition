@@ -17,7 +17,15 @@ enum ask_type{
     ASKLOGIN,
     ASKLOGOUT
 };
-
+/*
+const double LowWindRate = 0.8
+const double MidWindRate = 1.0
+const double HighWindRate = 1.3
+*/
+//不同档位风速单位能耗
+const double WindRate[4]={0.0,0.8,1.0,1.3};
+//电费费率
+//数据表默认刷新频率
  //subMachine info
 /*
 typedef struct slave_info{

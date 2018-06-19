@@ -1,7 +1,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define IP "10.128.224.254"
+#define IP "10.206.17.74"
+
 #define PORT 6666
 #define LOW_WIND_CHAR '1'
 #define MID_WIND_CHAR '2'
@@ -62,6 +63,8 @@
 #include <fstream>
 #include <QShortcut>
 using namespace std;
+
+extern QTcpSocket *sock;
 #endif // STL_H
 
 #endif // CONSTANTS_H

@@ -23,10 +23,10 @@ public:
     int roomid;
     QString user_id;
     void failInfo();
-    QTcpSocket* get_nct();
 
 public slots:
     void Isopen(QJsonObject);
+    void backToLogin();
 
 private slots:
     void on_pbquit_clicked();
@@ -37,9 +37,11 @@ private slots:
 signals:
     void showMainWindow(int,QJsonObject);
 
+    void askLogin(int,QString);
+
 private:
     Ui::login *ui;
-    netController nct;
+//    netController nct;
 };
 
 #endif // LOGIN_H

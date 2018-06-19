@@ -7,14 +7,10 @@ netController::netController(QObject *parent) :
 {
     BlockSize = 0;
     isopen = true;
-    tsock=new QTcpSocket(this);
+//    tsock=new QTcpSocket(this);
+    tsock = sock;
     connect(tsock,SIGNAL(readyRead()),this,SLOT(ReadMessage()));
     connect(tsock,&QAbstractSocket::disconnected,this,&netController::lostconnect);
-    //tsock->connectToHost(IP,PORT);
-}
-
-void netController::connectIP()
-{
     tsock->connectToHost(IP,PORT);
 }
 
@@ -32,11 +28,11 @@ void netController::send(QJsonObject json)
         out << str;
         out.device()->seek(0);
         out << (quint16)(blocks.size() - sizeof(quint16));
-        tsock->write(blocks);
-        tsock->waitForBytesWritten(300);
-        qDebug() << json.value("Type") << endl;
-    }else
-        qDebug() << "从机处于关机/待机状态..." << endl;
+        sock->write(blocks);
+        tsock->waitForBytesWritten(500);
+//        qDebug() << json.value("Type") << endl;
+    }
+//        qDebug() << "从机处于关机/待机状态..." << endl;
 }
 
 //发送送风请求
@@ -74,8 +70,9 @@ void netController::AskLogin(int roomid,QString id){
 //连接主机
 bool netController::preSendOpenInfo(int roomid,QString id){
     pendingroomid=roomid;
+//    qDebug() << &tsock;
     if(tsock->state()!=QAbstractSocket::ConnectedState){
-        tsock->connectToHost(QHostAddress(IP),PORT);//set host ip and port
+//        tsock->connectToHost(QHostAddress(IP),PORT);//set host ip and port
         if(tsock->waitForConnected(3000)==true){
             AskLogin(roomid,id);
         }
@@ -95,6 +92,8 @@ void netController::AskLogout(int roomid){
         al.insert("Type","AskLogout");
         al.insert("Room",roomid);
         send(al);
+//        mySleep(1000);
+//        qDebug() << al;
     }
 }
 //状态信息
@@ -156,11 +155,12 @@ void netController::ReadMessage(){
    QByteArray string1 = Message.toUtf8();
    QJsonDocument parseDoc = QJsonDocument::fromJson(string1);
    QJsonObject obj = parseDoc.object();
+   qDebug() << obj;
    QString type;
    if(obj.contains("Type")){
         type = obj.value("Type").toString();
    }
-   qDebug() <<"recv:"<< type << endl;
+//   qDebug() <<"recv:"<< type << endl;
    if(type == "EnergyAndCost"){
        emit energyAndCost(obj);
    }
@@ -181,16 +181,25 @@ void netController::ReadMessage(){
    }
    else if(type == "PowerOn")
    {
-       QJsonObject obj_temp;
-       emit centerPowerOn(obj_temp);
+//       QJsonObject obj_temp;
+       emit centerPowerOn();
    }
    BlockSize = 0;
 }
 
 void netController::lostconnect(){
-    emit centerPowerOff();
+    emit checkOut();
 }
 
 void netController::setIsOpen(bool m){
     isopen = m;
 }
+
+void netController::mySleep(int msec) //-----------------------------------------------------------------------------edit by marco
+{
+    QTime rtime = QTime::currentTime().addMSecs(msec);
+    while(QTime::currentTime()<rtime){
+        QCoreApplication::processEvents(QEventLoop::AllEvents,100);
+    }
+}
+

@@ -59,9 +59,6 @@ void MainWindow::on_pbLogReset_clicked()
 /*
 #点击刷新按钮
 */
-void MainWindow::on_pbLogRefresh_clicked()
-{
 
-}
 
 

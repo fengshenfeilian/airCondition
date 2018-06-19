@@ -20,10 +20,14 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event);
 
 public:
+    friend class NetController;
     explicit MainWindow(QWidget *parent = 0);
     void showLogTable();
     void initializeLog();
     void initializeReport();
+    int getState();
+    int getDefaultTemp(MainWindow w);
+    int getMasterState(MainWindow w);
     ~MainWindow();
 
 private slots:
@@ -93,6 +97,30 @@ private slots:
     void showTableNetinfo();
     //void updateTableRoomStateTup();
 
+    void on_pbResetNetinfo_clicked();
+
+//-----------------added by zwj-----------------
+
+
+public slots:
+    void stateActToMasterState();
+    void tempActToMasterState();
+
+    void workmodeActTo();
+
+signals:
+    void sendStateToMainWindow(int);
+    void sendTempToMainWindow(int);
+
+    void sendWorkmodeToMainWindow(int);
+
+    void closeConnection();
+    void tuifang(int);
+    void sendon();
+//--------------------------------------------
+
+
+
 private:
     Ui::MainWindow *ui;
 
@@ -102,15 +130,17 @@ private:
     QSqlTableModel *netinfoModel;
 
     int DEFAULT_TEMP=25;
-    int reportType=0;
     int MasterState = SHUTDOWN;
+    int DEFAULT_FREQ = 1;
+    int reportType=0;
+    double PowerRate = 5;
 
     bool m_move;
     QPoint m_startPoint;
     QPoint m_windowPoint;
     QTimer *updateTimer;
 
-    NetController netcon;
+//    NetController netcon;
 
 };
 

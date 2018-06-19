@@ -21,24 +21,33 @@ signals:
     void energyAndCost(QJsonObject obj);
     void stopWind(QJsonObject oj);
 //    void compelCLose();
+    void checkOut();
     void centerPowerOff();
-    void centerPowerOn(QJsonObject);
+    void centerPowerOn();
+    void freq(int);
+
 public:
     explicit netController(QObject *parent = 0);
     QTcpSocket *tsock;
-    void AskWindSupply(int roomid,int targettemp,int windspeed,int mode);
-    void StopWindSupply(int roomid);
+
+
     //void sendCloseInfo(int roomid);
     bool preSendOpenInfo(int roomid,QString id);//return true when connected,false otherwise
     void send(QJsonObject json);
     void ReplyForPowerOff(int roomid);
     void ReplyForPowerOn(int roomid);
     void ReplyForEnergyAndCost(int roomid);
-    void State(int roomid,int temp);
-    void AskLogout(int roomid);
+    void mySleep(int msec);
+
+
+public slots:
     void AskLogin(int roomid,QString id);
+    void AskWindSupply(int roomid,int targettemp,int windspeed,int mode);
     void setIsOpen(bool m);
-    void connectIP();
+    void AskLogout(int roomid);
+    void State(int roomid,int temp);
+    void StopWindSupply(int roomid);
+
 
 private:
     quint16 BlockSize;

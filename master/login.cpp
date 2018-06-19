@@ -45,6 +45,7 @@ void login::on_pblogin_clicked()
     if(query.next()){
         MainWindow *w = new MainWindow();
         w->show();
+        //w->move ((QApplication::desktop()->width() - w->width())/2,(QApplication::desktop()->height() -w->height())/2);
         this->hide();
     }
     else//管理员登录失败

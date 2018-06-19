@@ -67,6 +67,7 @@ void MainWindow::on_pbopen_clicked()
         setLbStatusMode();
         enableAccess();
         openSuccessInfo();
+        emit sendon();
     }
 }
 
@@ -82,6 +83,7 @@ void MainWindow::on_pbshutdown_clicked()
         setLbStatusMode();
         unableAccess();
         closeSuccessInfo();
+        emit closeConnection();
     }
 }
 
@@ -119,7 +121,22 @@ void MainWindow::on_temp_minus_clicked()
     setDefaultTemp(DEFAULT_TEMP-1);
 }
 
+//重置数据表netinfo
+void MainWindow::on_pbResetNetinfo_clicked()
+{
+    QSqlQuery q;
+    q.exec("delete from netinfo");
+    q.exec("update sqlite_sequence SET seq = 0 where name ='netinfo'");
 
+}
+
+//重置数据表logfile
+void MainWindow::on_pbLogRefresh_clicked()
+{
+    QSqlQuery q;
+    q.exec("delete from logfile");
+    q.exec("update sqlite_sequence SET seq = 0 where name ='logfile'");
+}
 
 
 /*
@@ -222,14 +239,14 @@ void MainWindow::showRoomState()
     roomstateModel->setHeaderData(roomstateModel->fieldIndex("current_cost"),Qt::Horizontal,"当前费用");
     roomstateModel->setHeaderData(roomstateModel->fieldIndex("check_in_time"),Qt::Horizontal,"入住时间");
     roomstateModel->setHeaderData(roomstateModel->fieldIndex("last_open_time"),Qt::Horizontal,"最近开机时间");
-    roomstateModel->setHeaderData(roomstateModel->fieldIndex("in_connect"),Qt::Horizontal,"连接状态");
+    roomstateModel->setHeaderData(roomstateModel->fieldIndex("in_connect"),Qt::Horizontal,"连接状态 ");
     roomstateModel->select();
     ui->slaveView->setModel(roomstateModel);
     //自适应填充窗口
     ui->slaveView->resizeColumnsToContents();
     ui->slaveView->horizontalHeader();
     for(int i = 0; i < ui->slaveView->horizontalHeader()->count(); i++){
-        ui->slaveView->setColumnWidth(i, ui->slaveView->columnWidth(i));
+        ui->slaveView->setColumnWidth(i, ui->slaveView->columnWidth(i)+20);
     }
     ui->slaveView->horizontalHeader()->setStretchLastSection(true);
 }
@@ -247,6 +264,7 @@ void MainWindow::showTableNetinfo()
     netinfoModel->setHeaderData(netinfoModel->fieldIndex("target_temp"),Qt::Horizontal,"目标温度");
     netinfoModel->setHeaderData(netinfoModel->fieldIndex("target_wind"),Qt::Horizontal,"目标风速");
     netinfoModel->setHeaderData(netinfoModel->fieldIndex("cost"),Qt::Horizontal,"费用");
+    netinfoModel->setHeaderData(netinfoModel->fieldIndex("run"),Qt::Horizontal,"运行状态");
     netinfoModel->select();
     ui->netinfoView->setModel(netinfoModel);
     //自适应填充窗口
@@ -271,13 +289,14 @@ void MainWindow::initTableRoomState()
     updateTimer = new QTimer(this);
     connect(updateTimer,&QTimer::timeout,this,&MainWindow::updateTableRoomState);
     connect(ui->boxRefreshFreq,SIGNAL(valueChanged(double)),this,SLOT(changeFreq(double)));
-    changeFreq(1.0);
+    changeFreq(DEFAULT_FREQ);
     QSqlQuery initq;
     initq.exec("update room_state SET in_connect=0");
 }
 
 void MainWindow::changeFreq(double newVal)
 {
+    DEFAULT_FREQ = newVal;
     updateTimer->stop();
     updateTimer->setInterval(int(newVal*1000));
     updateTimer->start();
@@ -298,10 +317,29 @@ void MainWindow::updateTableRoomState()
 {
     QSqlQuery allq;
     //qDebug()<<"fuck!!!!!";
-    allq.prepare("SELECT * FROM room_state");
-    allq.exec();
-  //  qDebug()<<allq.value(1).toInt();
+    allq.exec("SELECT * FROM room_state");
+    //allq.exec();
+    //  qDebug()<<allq.value(1).toInt();
     while(allq.next()){
+        QString last_open_time = allq.value(6).toString();
+        QDateTime current_time =QDateTime::currentDateTime();
+        QDateTime last_time = QDateTime::fromString(last_open_time,"yyyy-MM-dd hh:mm:ss ddd");
+        QDateTime t = last_time.addSecs(DEFAULT_FREQ*10);
+        int quantum;
+        if(t<current_time){
+            quantum = t.secsTo(current_time);
+        }else{
+            quantum = last_time.secsTo(current_time);
+        }
+        int room_id = allq.value(0).toInt();
+        int current_wind = allq.value(3).toInt();
+        double current_cost = allq.value(4).toDouble();
+        double perCost = quantum * WindRate[current_wind] * PowerRate/60;
+        QSqlQuery q;
+        q.prepare("UPDATE room_state SET current_cost=:cost WHERE room_id=:rid");
+        q.bindValue(":cost",current_cost + perCost);
+        q.bindValue(":rid",room_id);
+        q.exec();
     }
 }
 

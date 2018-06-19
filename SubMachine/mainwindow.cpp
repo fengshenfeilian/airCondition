@@ -13,12 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     for(int i=0;i<4;++i) modeCnt[i] = 0;
     setWindowTitle("空调");
-    currentwindspeed=2;
+    currentwindspeed=0;
     usedfee=0.0;
     usedenergy=0.0;
     isopen=false;
     this->setWindowFlags(Qt::FramelessWindowHint);//隐藏标题栏
-    netcon.tsock = log.get_nct();
 
     //use button group to make wind speed buttons exclusive
     windSpeedGroup=new QButtonGroup(this);
@@ -39,21 +38,21 @@ MainWindow::MainWindow(QWidget *parent) :
 /*
     setdelaytimer=new QTimer(this);
     setdelaytimer->setSingleShot(true);
-    setdelaytimer->setInterval(1000);//temperature will update until 1 sec with no operation
-    connect(setdelaytimer,&QTimer::timeout,this,&MainWindow::changeTargetTemp);*/
-/*
-    judgetimer=new QTimer(this);
-    judgetimer->setInterval(5000);
-    connect(judgetimer,&QTimer::timeout,this,&MainWindow::judgeTemp);
-*/
+    setdelaytimer->setInterval(1000);//temperature will update until 1 sec with no operation*/
+//    connect(setdelaytimer,&QTimer::timeout,this,&MainWindow::changeTargetTemp);
+
+//    judgetimer=new QTimer(this);
+//    judgetimer->setInterval(1000);
+//    connect(judgetimer,&QTimer::timeout,this,&MainWindow::judgeTemp);
+
     //connect with net controller
 
-    connect(&netcon,&netController::recvWind,this,&MainWindow::ReceiveWind);
+//    connect(&netcon,&netController::recvWind,this,&MainWindow::ReceiveWind);
 //  connect(&netcon,&netController::compelCLose,this,&MainWindow::CloseMachine);
-    connect(&netcon,&netController::energyAndCost,this,&MainWindow::SetEnergy);
-    connect(&netcon,&netController::stopWind,this,&MainWindow::StopWind);
-    connect(&netcon,&netController::centerPowerOff,this,&MainWindow::toAwait);
-    connect(&netcon,&netController::centerPowerOn,this,&MainWindow::restart);
+//    connect(&netcon,&netController::energyAndCost,this,&MainWindow::SetEnergy);
+//    connect(&netcon,&netController::stopWind,this,&MainWindow::StopWind);
+//    connect(&netcon,&netController::centerPowerOff,this,&MainWindow::toAwait);
+//    connect(&netcon,&netController::centerPowerOn,this,&MainWindow::restart);
 
 }
 
@@ -86,16 +85,15 @@ void MainWindow::onWindSpeedClick(){
         targetWind = 3;
 //        changeWindSpeed(3);
     }
-    netcon.AskWindSupply(roomid,targettemp,targetWind,currentmode);
+//    netcon.AskWindSupply(roomid,targettemp,targetWind,currentmode);
+    emit askWindSupply(roomid,targettemp,targetWind,currentmode);
 }
 //启动从控
 void MainWindow::OpenMachine(int roomid,QJsonObject obj){
     this->roomid = roomid;
     currentmode=obj.take("WorkMode").toInt();
     targettemp=temp_targettemp=obj.take("WorkTemperature").toInt();
-
-    roomtemp = targettemp;
-    qDebug() << "roomtemp:" << roomtemp;
+    roomtemp = 28;
     ui->SetTemp->setText(tr("%1").arg(targettemp));
     if(currentmode==0){
         ui->CurrentMode->setText("制冷");
@@ -131,14 +129,16 @@ void MainWindow::OpenMachine(int roomid,QJsonObject obj){
         //judgetimer->start();
         regresstemptimer->start();
     }
+    //开机发送送风请求
+//    netcon.AskWindSupply(roomid,targettemp,targetWind,currentmode);
+//    emit askWindSupply(roomid,targettemp,targetWind,currentmode);
     this->show();
 }
 
 void MainWindow::CloseMachine(){
     isopen=false;
-    netcon.setIsOpen(isopen);
+//    netcon.setIsOpen(isopen);
     ui->OpenClose->setText("开机");
-
     //disable all display widget
     ui->IncreaseTemp->setEnabled(false);
     ui->DecreaseTemp->setEnabled(false);
@@ -153,12 +153,13 @@ void MainWindow::CloseMachine(){
     //stop all timer
     //judgetimer->stop();
     regresstemptimer->stop();
+    emit setisopen(isopen);
     this->close();
 }
 
 void MainWindow::toAwait(){
     isopen=false;
-    netcon.setIsOpen(isopen);
+//    netcon.setIsOpen(isopen);
     ui->OpenClose->setText("关机");
 //    ui->OpenClose->setEnabled(false);
     //disable all display widget
@@ -173,8 +174,9 @@ void MainWindow::toAwait(){
     ui->UsedEnergy->setText(tr("%1").arg(usedenergy));
     ui->UsedFee->setText(tr("%1").arg(usedfee));
     //stop all timer
-    judgetimer->stop();
-    //regresstemptimer->stop();
+   // judgetimer->stop();
+    emit setisopen(isopen);
+    regresstemptimer->stop();
 }
 
 void MainWindow::ReceiveWind(QJsonObject obj){
@@ -208,16 +210,20 @@ void MainWindow::ReceiveWind(QJsonObject obj){
 }
 
 void MainWindow::handleOpenClose(){
-    if(isopen==false){
-//        log.show();
-//        roomid = log.roomid;
-//        user_id = log.user_id;
-        netcon.AskLogin(roomid,user_id);
-    }
-    else{
-        netcon.AskLogout(roomid);
-        mySleep(1000);
-        CloseMachine();
+    if(isopen==true){
+//        netcon.AskLogout(roomid);
+        qDebug() << "shutdown";
+        this->close();
+        isopen = false;
+        emit askLogout(roomid);
+//        emit askLogout2();
+        /*QTime t;
+//        Sleep(1000);
+        t.start();
+        while(t.elapsed()<1000)
+            QCoreApplication::processEvents();*/
+
+//        CloseMachine();
     }
 }
 
@@ -225,9 +231,8 @@ void MainWindow::handleOpenClose(){
 
 void MainWindow::increaseTargetTemp(){
     if(currentmode==0){//cool mode
-        if(temp_targettemp<25){
+        if(temp_targettemp<30){
             temp_targettemp++;
-
             ui->SetTemp->setText(tr("%1").arg(temp_targettemp));
 //            setdelaytimer->start();
         }
@@ -268,20 +273,25 @@ void MainWindow::changeWindSpeed(int newspeed){
 //随机生成当前温度
 void MainWindow::generateRoomTemp(){
     ui->CurrentTemp->setText(tr("%1").arg(roomtemp));
-    netcon.State(roomid,roomtemp);
+//    netcon.State(roomid,roomtemp);
+    emit state(roomid,roomtemp);
 }
 
 void MainWindow::regressTemp(){
+    qDebug() << "isopen:" << isopen;
+    if(isopen == false) return;
     //regress room temperature based on current work mode
     qDebug() << "judgetemp:" << judgeTemp() << " currentWindspeed:" << currentwindspeed << endl;
     if(judgeTemp() == 0){
         if(currentwindspeed != 0){
-            netcon.StopWindSupply(roomid);
+//            netcon.StopWindSupply(roomid);
+            emit stopWindSupply(roomid);
             return;
         }
     }
     if(judgeTemp() == 1 && currentwindspeed == 0){
-        netcon.AskWindSupply(roomid,targettemp,targetWind,currentmode);
+//        netcon.AskWindSupply(roomid,targettemp,targetWind,currentmode);
+          emit askWindSupply(roomid,targettemp,targetWind,currentmode);
 //        return;
     }
     if(currentmode==0){
@@ -320,22 +330,24 @@ void MainWindow::regressTemp(){
         ++modeCnt[currentwindspeed];
         switch(currentwindspeed){
         case 0:
-            if(modeCnt[currentwindspeed]%5 == 0){
+            if(modeCnt[currentwindspeed]%15 == 0){
                 roomtemp --;
             }
             break;
         case 1:
-            if(modeCnt[currentwindspeed]%5 == 0){
+            if(modeCnt[currentwindspeed]%15 == 0){
                 roomtemp ++;
             }
             break;
         case 2:
-            if(modeCnt[currentwindspeed]%3 == 0){
+            if(modeCnt[currentwindspeed]%10 == 0){
                 roomtemp++;
             }
             break;
         default:
-            roomtemp ++;
+            if(modeCnt[currentwindspeed]%5 == 0){
+                roomtemp++;
+            }
             break;
         }
         if(roomtemp>35){
@@ -345,9 +357,10 @@ void MainWindow::regressTemp(){
             roomtemp = 18;
         }
     }
-//    qDebug() << "now roomtemp:" << roomtemp << endl;
+    qDebug() << "state:" << roomtemp << endl;
     ui->CurrentTemp->setText(tr("%1").arg(roomtemp));
-    netcon.State(roomid,roomtemp);
+//    netcon.State(roomid,roomtemp);
+    emit state(roomid,roomtemp);
 }
 
 
@@ -365,11 +378,9 @@ int MainWindow::judgeTemp(){
 }
 
 void MainWindow::SetEnergy(QJsonObject obj){
-    qDebug() << obj.value("Cost");
     usedfee = obj.value("Cost").toDouble();
     usedenergy = obj.value("Energy").toDouble();
-    qDebug() << usedfee;
-    qDebug() << usedenergy;
+//    qDebug() << "cost:" << usedfee << " " << usedenergy;
     ui->UsedEnergy->setText(tr("%1").arg(usedenergy));
     ui->UsedFee->setText(tr("%1").arg(usedfee));
 }
@@ -400,7 +411,7 @@ void MainWindow::StopWind(QJsonObject obj){
 
 void MainWindow::restart(){
     isopen=true;
-    netcon.setIsOpen(isopen);
+//    netcon.setIsOpen(isopen);
     ui->OpenClose->setText("关机");
     ui->OpenClose->setEnabled(true);
     //enable all display widget
@@ -415,20 +426,20 @@ void MainWindow::restart(){
     ui->UsedEnergy->setText(tr("%1").arg(usedenergy));
     ui->UsedFee->setText(tr("%1").arg(usedfee));
     //start all timer
-    judgetimer->start();
-//    regresstemptimer->start();
+    //judgetimer->start();
+    emit setisopen(isopen);
+    regresstemptimer->start();
+}
+
+void MainWindow::CheckOut(){
+    this->close();
+    exit(0);
 }
 
 
-void MainWindow::on_DecreaseTemp_clicked()
+void MainWindow::setFreq(int freq)
 {
-
-}
-
-void MainWindow::mySleep(int msec) //-----------------------------------------------------------------------------edit by marco
-{
-    QTime rtime = QTime::currentTime().addMSecs(msec);
-    while(QTime::currentTime()<rtime){
-        QCoreApplication::processEvents(QEventLoop::AllEvents,100);
-    }
+    this -> regresstemptimer ->stop();
+    this->regresstemptimer->setInterval(freq);
+    this -> regresstemptimer->start();
 }

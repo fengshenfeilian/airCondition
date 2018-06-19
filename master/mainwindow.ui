@@ -138,7 +138,7 @@
          </rect>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page">
          <widget class="QPushButton" name="pbopen">
@@ -277,23 +277,21 @@
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="6">
-            <widget class="QLineEdit" name="lineEdit"/>
-           </item>
-           <item row="0" column="2">
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>费用刷新频率(/10secs): </string>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+            </widget>
            </item>
-           <item row="0" column="3">
+           <item row="1" column="3">
+            <widget class="QSpinBox" name="spinBox">
+             <property name="showGroupSeparator" stdset="0">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="5">
             <spacer name="horizontalSpacer_2">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -306,29 +304,48 @@
              </property>
             </spacer>
            </item>
-           <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="boxRefreshFreq">
-             <property name="value">
-              <double>1.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="4">
+           <item row="1" column="6">
             <widget class="QLabel" name="label_5">
              <property name="text">
               <string>输入关键字以搜索数据库:         </string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_6">
+           <item row="3" column="0" colspan="9">
+            <widget class="QTableView" name="slaveView"/>
+           </item>
+           <item row="1" column="8">
+            <widget class="QLineEdit" name="lineEdit"/>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>刷新频率</string>
+              <string>温度刷新频率: </string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0" colspan="7">
-            <widget class="QTableView" name="slaveView"/>
+           <item row="1" column="4">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSpinBox" name="boxRefreshFreq">
+             <property name="minimum">
+              <number>6</number>
+             </property>
+             <property name="maximum">
+              <number>60</number>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -369,6 +386,13 @@
            </item>
            <item row="1" column="0" colspan="3">
             <widget class="QTableView" name="netinfoView"/>
+           </item>
+           <item row="2" column="0" colspan="3">
+            <widget class="QPushButton" name="pbResetNetinfo">
+             <property name="text">
+              <string>重置</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>

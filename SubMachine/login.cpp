@@ -10,7 +10,7 @@ login::login(QWidget *parent) :
     ui(new Ui::login)
 {
     ui->setupUi(this);   //对界面进行初始化
-    connect(&nct,&netController::recvOpenAck,this,&login::Isopen);
+//    connect(&nct,&netController::recvOpenAck,this,&login::Isopen)
 }
 
 login::~login()
@@ -25,7 +25,6 @@ void login::on_pbquit_clicked()
 
 void login::on_pblogin_clicked()
 {
-    nct.connectIP();
     //输入信息不完整
     if(ui->leuid->text().isEmpty()||ui->lepsd->text().isEmpty()){
        QMessageBox::information(this,tr("Notice"),tr("请输入完整信息！"),QMessageBox::Ok);
@@ -35,7 +34,10 @@ void login::on_pblogin_clicked()
     roomid=ui->leuid->text().toInt();
     user_id=ui->lepsd->text().trimmed();
 
-    nct.AskLogin(roomid,user_id);
+
+//    nct.AskLogin(roomid,user_id);
+     emit askLogin(roomid,user_id);
+
 
     //管理员登录成功
     /*bool network.verified(uid,psd):
@@ -54,16 +56,19 @@ void login::failInfo(){
 
 void login::Isopen(QJsonObject obj){
     if(obj.contains("Type")){
-            if(obj.take("Reply").toBool() == 1){
+//        qDebug() << obj;
+            if(obj.value("Reply").toInt() == 1){
                 this->failInfo();
+//                return;
             }else{
-                this->close();
+                this->hide();
                 emit showMainWindow(roomid,obj);
             }
         }
 }
 
-QTcpSocket* login::get_nct()
-{
-    return this->nct.tsock;
+void login::backToLogin(){
+    ui->leuid->clear();
+    ui->lepsd->clear();
+    this->show();
 }

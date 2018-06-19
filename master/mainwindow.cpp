@@ -57,3 +57,28 @@ void MainWindow::on_pbExit_clicked()
 {
     qApp->quit();
 }
+
+int MainWindow::getDefaultTemp(MainWindow w)
+{
+    return w.DEFAULT_TEMP;
+}
+
+int MainWindow::getMasterState(MainWindow w)
+{
+    return w.MasterState;
+}
+
+
+//--------------added by zwj-----------
+void MainWindow::stateActToMasterState(){
+    emit sendStateToMainWindow(this->MasterState);
+}
+
+void MainWindow::tempActToMasterState(){
+    emit sendTempToMainWindow(this->DEFAULT_TEMP);
+}
+
+void MainWindow::workmodeActTo(){
+    emit sendWorkmodeToMainWindow(this->workmode);
+}
+
