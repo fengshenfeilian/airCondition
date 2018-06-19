@@ -23,6 +23,7 @@ public:
     int roomid;
     QString user_id;
     void failInfo();
+    QTcpSocket* get_nct();
 
 public slots:
     void Isopen(QJsonObject);

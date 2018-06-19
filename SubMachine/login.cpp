@@ -25,6 +25,7 @@ void login::on_pbquit_clicked()
 
 void login::on_pblogin_clicked()
 {
+    nct.connectIP();
     //输入信息不完整
     if(ui->leuid->text().isEmpty()||ui->lepsd->text().isEmpty()){
        QMessageBox::information(this,tr("Notice"),tr("请输入完整信息！"),QMessageBox::Ok);
@@ -34,9 +35,7 @@ void login::on_pblogin_clicked()
     roomid=ui->leuid->text().toInt();
     user_id=ui->lepsd->text().trimmed();
 
-
     nct.AskLogin(roomid,user_id);
-
 
     //管理员登录成功
     /*bool network.verified(uid,psd):
@@ -62,4 +61,9 @@ void login::Isopen(QJsonObject obj){
                 emit showMainWindow(roomid,obj);
             }
         }
+}
+
+QTcpSocket* login::get_nct()
+{
+    return this->nct.tsock;
 }

@@ -13,19 +13,6 @@
 */
 
 /*
-//温控请求信息表:
-| room_id | start_time | 
-create table net_info(
-
-room_id int not null,
-start_time text not null,
-user_id text not null,
-target_wind int not null,
-target_temp int not null,
-end_time text not null,
-cost double not null,
-primary key(room_id,start_time)
-);
 #如何更新end_time?
 #当下一个同房间的请求发来的时候,更新当前请求的end_time
 */
@@ -46,14 +33,7 @@ primary key(room_id,start_time)
 #daily_cost += 昨日正在进行的送风和持续到明天的送风
 */
 
-//主机状态的变化以及在不同状态下对温控请求的响应:
 
-/*选做:
-1.开机: 如果温控请求队列为空,那么进入待机状态
-2.待机: 如果温控请求不为空,那么进入开机状态
-3.待机状态下的响应:
-    1. 
-*/
 
 NetController::NetController(QObject *parent) :
     QTcpServer(parent)
@@ -79,6 +59,7 @@ void NetController::sendReply(QTcpSocket* tsock,int reply,int workmode,int workt
     rfl.insert("Reply",reply);
     rfl.insert("WorkMode",workmode);
     rfl.insert("WorkTemperature",worktemp);
+    qDebug()<<rfl<<endl;//------------------------------------------------------------------------debug
     send(tsock,rfl);
 }
 //发送能耗和费用信息
@@ -130,10 +111,8 @@ void NetController::ReadMessage(int no,QJsonObject obj)
 {
        qDebug() << "readmessage" << endl;
        qDebug() << obj <<endl;
-       if(MasterState==OPEN || MasterState==WAIT){
-           MasterState=OPEN;
-           processMessage(no,obj);
-       }
+      // qDebug()<<MasterState<<endl;
+       processMessage(no,obj);
 }
 
 /*
@@ -151,6 +130,8 @@ void NetController::ReadMessage(int no,QJsonObject obj)
 */
 void NetController::processMessage(int no, QJsonObject obj)
 {
+    //qDebug()<<"fuck!!!!!!!!!!!!!!!!!!!!!!!!!!<<endl";
+                                             //--------------------------------------------debug
     QString type = obj.value("Type").toString();
     //从机请求登录
     if(type == "AskLogin"){
@@ -331,6 +312,7 @@ void NetController::closeServer()
 */
 void NetController::judgeLogin(int no,QJsonObject obj)
 {
+    //qDebug()<<"fuck!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl; //------------------------------debug
     int id = obj.value("Room").toInt();
     QString user_id = obj.value("ID").toString();
     TcpClientSocket* tcpClientSocket;

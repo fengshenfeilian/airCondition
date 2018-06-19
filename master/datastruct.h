@@ -18,8 +18,6 @@ enum ask_type{
     ASKLOGOUT
 };
 
-static int MasterState=SHUTDOWN;
-
  //subMachine info
 /*
 typedef struct slave_info{

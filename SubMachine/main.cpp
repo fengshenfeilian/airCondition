@@ -7,7 +7,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QObject>
-#pragma execution_character_set("utf-8")
+//#pragma execution_character_set("utf-8")
 
 int main(int argc, char *argv[])
 {
@@ -15,8 +15,8 @@ int main(int argc, char *argv[])
     MainWindow w;
     login l;
 //    w.show();
+//    qDebug() << "fff" << endl;
     l.show();
-    qDebug() << "afsd";
     QObject::connect(&l,SIGNAL(showMainWindow(int,QJsonObject)),&w,SLOT(OpenMachine(int,QJsonObject)));
 //    connect(&log,&login::showMainWindow,this,&MainWindow::OpenMachine);
 //    QObject::connect(&l,SIGNAL(showMainWindow(int,QString)),&w,SLOT(ShowMainWindow(int,QString)));

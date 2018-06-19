@@ -103,7 +103,7 @@ private:
 
     int DEFAULT_TEMP=25;
     int reportType=0;
-    //int MasterState = SHUTDOWN;
+    int MasterState = SHUTDOWN;
 
     bool m_move;
     QPoint m_startPoint;
